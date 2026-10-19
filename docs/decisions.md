@@ -17,3 +17,6 @@ One short entry per technical choice, newest last.
   cookie-reading layout behind `<Suspense>`.
 - **Auth signing keys generated locally and stored as Convex env vars**
   (`JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`), never in the repo.
+- **Convex prod is deployed by the Vercel build** (`vercel.json`:
+  `npx convex deploy --cmd 'npm run build'`), so frontend and backend always
+  ship together from the same commit. Vercel only holds `CONVEX_DEPLOY_KEY`.

@@ -8,9 +8,8 @@ anything is sent. Full spec: `FlowPilot AI — PRD.pdf`.
 
 ## Current stage
 
-**Stage 0: Setup** — app, Convex and Convex Auth (password) work locally.
-Still open in Stage 0: GitHub repo, Vercel deploy, Convex production deploy,
-login on the deployed URL.
+**Stage 0: Setup — done.** Live at https://flow-pilot-rose.vercel.app
+(Vercel) with Convex prod `amicable-raccoon-556`. Next: **Stage 1: Property data**.
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.

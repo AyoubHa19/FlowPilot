@@ -6,7 +6,9 @@ to approve before anything is sent.
 
 Built with Next.js, Convex, Convex Auth, shadcn/ui and Gemini.
 
-> Status: Stage 0 (setup). Architecture, schema, decisions and eval results
+> Live demo: https://flow-pilot-rose.vercel.app
+>
+> Status: Stage 0 (setup) done. Architecture, schema, decisions and eval results
 > will be documented here as the stages land.
 
 ## Run locally
