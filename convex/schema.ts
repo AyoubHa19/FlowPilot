@@ -2,6 +2,7 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
+  importJobStatus,
   leaseStatus,
   ticketCategory,
   ticketPriority,
@@ -64,4 +65,33 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_unit_status", ["unitId", "status"]),
+
+  // --- Background jobs -----------------------------------------------------
+
+  // Running counters, so the progress bar reads one row, not thousands.
+  // total is known once the CSV is parsed; the job is done when
+  // processed + failed === total.
+  importJobs: defineTable({
+    kind: v.literal("properties"),
+    status: importJobStatus,
+    storageId: v.id("_storage"),
+    filename: v.string(),
+    total: v.number(),
+    processed: v.number(),
+    failed: v.number(),
+    // Rows that created at least one new record; 0 on a re-import.
+    created: v.number(),
+    // Job-level failure (unreadable file, missing columns).
+    error: v.optional(v.string()),
+    finishedAt: v.optional(v.number()),
+  }).index("by_status", ["status"]),
+
+  // One row per rejected CSV line. Kept out of importJobs so a file with
+  // thousands of bad rows cannot hit the 1 MB document limit.
+  importRowErrors: defineTable({
+    jobId: v.id("importJobs"),
+    row: v.number(), // line number in the CSV, header is line 1
+    message: v.string(),
+    data: v.string(), // the raw row as JSON, for the error report
+  }).index("by_job_row", ["jobId", "row"]),
 });

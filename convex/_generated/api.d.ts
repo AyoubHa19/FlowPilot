@@ -11,8 +11,10 @@
 import type * as auth from "../auth.js";
 import type * as buildings from "../buildings.js";
 import type * as http from "../http.js";
+import type * as imports from "../imports.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as model_importRows from "../model/importRows.js";
 import type * as model_properties from "../model/properties.js";
 import type * as seed from "../seed.js";
 import type * as seedData from "../seedData.js";
@@ -29,8 +31,10 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   buildings: typeof buildings;
   http: typeof http;
+  imports: typeof imports;
   "lib/auth": typeof lib_auth;
   "lib/validators": typeof lib_validators;
+  "model/importRows": typeof model_importRows;
   "model/properties": typeof model_properties;
   seed: typeof seed;
   seedData: typeof seedData;
@@ -64,4 +68,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  importPool: import("@convex-dev/workpool/_generated/component.js").ComponentApi<"importPool">;
+};

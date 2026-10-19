@@ -12,6 +12,15 @@ export type Upserted<T extends PropertyTable> = {
   created: boolean;
 };
 
+/**
+ * True when a field differs. Upserts patch only then, so a re-import writes
+ * nothing and parallel import batches do not conflict on rows they only read.
+ */
+function hasChanges(existing: object, fields: object) {
+  const current = existing as Record<string, unknown>;
+  return Object.entries(fields).some(([key, value]) => current[key] !== value);
+}
+
 export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
@@ -33,7 +42,9 @@ export async function upsertBuilding(
     .withIndex("by_name", (q) => q.eq("name", fields.name))
     .unique();
   if (existing) {
-    await ctx.db.patch(existing._id, fields);
+    if (hasChanges(existing, fields)) {
+      await ctx.db.patch(existing._id, fields);
+    }
     return { id: existing._id, created: false };
   }
   return { id: await ctx.db.insert("buildings", fields), created: true };
@@ -50,7 +61,9 @@ export async function upsertUnit(
     )
     .unique();
   if (existing) {
-    await ctx.db.patch(existing._id, fields);
+    if (hasChanges(existing, fields)) {
+      await ctx.db.patch(existing._id, fields);
+    }
     return { id: existing._id, created: false };
   }
   return { id: await ctx.db.insert("units", fields), created: true };
@@ -63,7 +76,10 @@ export async function upsertTenant(
   const email = normalizeEmail(fields.email);
   const existing = await findTenantByEmail(ctx, email);
   if (existing) {
-    await ctx.db.patch(existing._id, { ...fields, email });
+    const next = { ...fields, email };
+    if (hasChanges(existing, next)) {
+      await ctx.db.patch(existing._id, next);
+    }
     return { id: existing._id, created: false };
   }
   return {
@@ -85,7 +101,9 @@ export async function upsertLease(
     (l) => l.unitId === fields.unitId && l.startDate === fields.startDate,
   );
   if (existing) {
-    await ctx.db.patch(existing._id, fields);
+    if (hasChanges(existing, fields)) {
+      await ctx.db.patch(existing._id, fields);
+    }
     return { id: existing._id, created: false };
   }
   return { id: await ctx.db.insert("leases", fields), created: true };
@@ -102,7 +120,9 @@ export async function upsertTicket(
     .collect();
   const existing = tickets.find((t) => t.description === fields.description);
   if (existing) {
-    await ctx.db.patch(existing._id, fields);
+    if (hasChanges(existing, fields)) {
+      await ctx.db.patch(existing._id, fields);
+    }
     return { id: existing._id, created: false };
   }
   return { id: await ctx.db.insert("tickets", fields), created: true };

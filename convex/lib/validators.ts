@@ -7,6 +7,15 @@ export const leaseStatus = v.union(
 );
 export type LeaseStatus = Infer<typeof leaseStatus>;
 
+export const importJobStatus = v.union(
+  v.literal("queued"),
+  v.literal("parsing"),
+  v.literal("processing"),
+  v.literal("completed"),
+  v.literal("failed"),
+);
+export type ImportJobStatus = Infer<typeof importJobStatus>;
+
 export const ticketCategory = v.union(
   v.literal("plumbing"),
   v.literal("electrical"),
