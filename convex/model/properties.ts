@@ -1,5 +1,5 @@
 import type { Doc, Id } from "../_generated/dataModel";
-import type { MutationCtx } from "../_generated/server";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
 
 // Upserts by natural key, shared by the seed and (Stage 2) the CSV import,
 // so running either one twice never creates duplicates.
@@ -14,6 +14,14 @@ export type Upserted<T extends PropertyTable> = {
 
 export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+/** One index read on by_email. Also used by the agent's find_tenant_by_email. */
+export async function findTenantByEmail(ctx: QueryCtx, email: string) {
+  return await ctx.db
+    .query("tenants")
+    .withIndex("by_email", (q) => q.eq("email", normalizeEmail(email)))
+    .unique();
 }
 
 export async function upsertBuilding(
@@ -53,10 +61,7 @@ export async function upsertTenant(
   fields: Fields<"tenants">,
 ): Promise<Upserted<"tenants">> {
   const email = normalizeEmail(fields.email);
-  const existing = await ctx.db
-    .query("tenants")
-    .withIndex("by_email", (q) => q.eq("email", email))
-    .unique();
+  const existing = await findTenantByEmail(ctx, email);
   if (existing) {
     await ctx.db.patch(existing._id, { ...fields, email });
     return { id: existing._id, created: false };
