@@ -11,7 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit && tsc --noEmit -p convex",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate:import-csv": "node scripts/generate-import-csv.mjs"
+    "generate:import-csv": "node scripts/generate-import-csv.mjs",
+    "generate:lease-pdfs": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-lease-pdfs.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.100",
