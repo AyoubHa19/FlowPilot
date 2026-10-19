@@ -150,7 +150,7 @@ describe("a repair email from a tenant", () => {
     mock.agentTurns = [toolCall("draft_reply", DRAFT)];
     const { run, steps } = await latestRun(await simulate());
 
-    expect(run).toMatchObject({ status: "drafted", category: "repair", urgency: "high", draft: DRAFT });
+    expect(run).toMatchObject({ status: "awaiting_approval", category: "repair", urgency: "high", draft: DRAFT });
     expect(steps.map((s) => s.name)).toEqual([
       "classify",
       "find_tenant_by_email",
@@ -159,8 +159,11 @@ describe("a repair email from a tenant", () => {
       "search_lease_documents",
       "agent",
       "draft_reply",
+      "send_reply",
     ]);
-    expect(steps.every((s) => s.status === "succeeded")).toBe(true);
+    // Every step succeeded; the last one waits for a person.
+    expect(steps.slice(0, -1).every((s) => s.status === "succeeded")).toBe(true);
+    expect(steps.at(-1)).toMatchObject({ type: "approval", status: "running" });
     // Context reached the model: tenant, lease, the open heating ticket, the lease passage.
     expect(steps[1].output).toContain(felix.name);
     expect(steps[2].output).toContain('"noticePeriodDays": 90');
@@ -179,7 +182,7 @@ describe("a repair email from a tenant", () => {
     const search = steps.find((s) => s.name === "search_lease_documents")!;
     expect(search).toMatchObject({ status: "succeeded", attempt: 2 });
     expect(search.error).toMatch(/Injected failure/);
-    expect(run.status).toBe("drafted");
+    expect(run.status).toBe("awaiting_approval");
   });
 
   test("a failed model call is retried with the fallback model", async () => {
@@ -190,7 +193,7 @@ describe("a repair email from a tenant", () => {
     const agent = steps.find((s) => s.name === "agent")!;
     expect(agent).toMatchObject({ status: "succeeded", attempt: 2 });
     expect(agent.output).toContain("gemini-3.5-flash-lite");
-    expect(run.status).toBe("drafted");
+    expect(run.status).toBe("awaiting_approval");
   });
 });
 
@@ -211,7 +214,7 @@ describe("guardrails", () => {
       expect.stringContaining("not a known tenant"),
     ]);
     expect(steps.some((s) => s.output?.includes(felix.name))).toBe(false);
-    expect(run.status).toBe("drafted");
+    expect(run.status).toBe("awaiting_approval");
   });
 
   test("invalid tool input is returned to the model, which can correct it", async () => {
@@ -222,7 +225,7 @@ describe("guardrails", () => {
     const { run, steps } = await latestRun(await simulate());
     const bad = steps.filter((s) => s.name === "search_lease_documents").at(-1)!;
     expect(bad.output).toMatch(/Invalid input. query/);
-    expect(run.status).toBe("drafted");
+    expect(run.status).toBe("awaiting_approval");
   });
 
   test("more than 8 tool calls escalates to a human", async () => {
@@ -248,7 +251,7 @@ describe("guardrails", () => {
   test("a plain-text answer is kept as the draft", async () => {
     mock.agentTurns = [text("Dear Felix, we are on it.")];
     const { run } = await latestRun(await simulate());
-    expect(run).toMatchObject({ status: "drafted", draft: { body: "Dear Felix, we are on it." } });
+    expect(run).toMatchObject({ status: "awaiting_approval", draft: { body: "Dear Felix, we are on it." } });
   });
 });
 
@@ -307,5 +310,140 @@ describe("automatedReason", () => {
 
   test("lets a person's email through", () => {
     expect(automatedReason({ fromEmail: "felix.braun@example.com", labelIds: ["INBOX", "UNREAD"] })).toBeUndefined();
+  });
+});
+
+// --- Approvals (Stage 6) ---------------------------------------------------
+
+async function approvalsFor(threadId: Id<"emailThreads">) {
+  const { run } = await latestRun(threadId);
+  return await asUser.query(api.approvals.forRun, { runId: run._id });
+}
+
+async function outbound(threadId: Id<"emailThreads">) {
+  const detail = await asUser.query(api.inbox.getThread, { threadId });
+  return detail!.messages.filter((m) => m.direction === "outbound");
+}
+
+const TICKET = { category: "heating", priority: "high", description: "Heating does not work in the flat." };
+
+describe("approvals", () => {
+  test("the run waits: nothing is sent before a decision", async () => {
+    mock.agentTurns = [toolCall("draft_reply", DRAFT)];
+    const threadId = await simulate();
+    const [approval] = await approvalsFor(threadId);
+
+    expect(approval).toMatchObject({ action: "send_reply", status: "pending", payload: DRAFT });
+    expect(await outbound(threadId)).toEqual([]);
+    expect(await asUser.query(api.approvals.pendingCount, {})).toBe(1);
+    const detail = await asUser.query(api.inbox.getThread, { threadId });
+    expect(detail?.thread.status).toBe("awaiting_approval");
+  });
+
+  test("Approve sends the draft", async () => {
+    mock.agentTurns = [toolCall("draft_reply", DRAFT)];
+    const threadId = await simulate();
+    const [approval] = await approvalsFor(threadId);
+
+    await asUser.mutation(api.approvals.approve, { approvalId: approval._id });
+    await t.finishAllScheduledFunctions(vi.runAllTimers, 500);
+
+    const sent = await outbound(threadId);
+    expect(sent.map((m) => [m.sendStatus, m.subject, m.bodyText])).toEqual([["sent", DRAFT.subject, DRAFT.body]]);
+    expect((await latestRun(threadId)).run.status).toBe("completed");
+    expect((await approvalsFor(threadId))[0].status).toBe("executed");
+    expect(await asUser.query(api.approvals.pendingCount, {})).toBe(0);
+  });
+
+  test("Edit sends the edited text, not the draft", async () => {
+    mock.agentTurns = [toolCall("draft_reply", DRAFT)];
+    const threadId = await simulate();
+    const [approval] = await approvalsFor(threadId);
+    const edited = { subject: "Re: Heating", body: "Edited by the manager: Thursday 9-12." };
+
+    await asUser.mutation(api.approvals.approveEdited, { approvalId: approval._id, payload: edited });
+    await t.finishAllScheduledFunctions(vi.runAllTimers, 500);
+
+    expect((await outbound(threadId)).map((m) => m.bodyText)).toEqual([edited.body]);
+    expect((await approvalsFor(threadId))[0]).toMatchObject({ status: "executed", editedPayload: edited });
+  });
+
+  test("Reject sends nothing and records the reason", async () => {
+    mock.agentTurns = [toolCall("draft_reply", DRAFT)];
+    const threadId = await simulate();
+    const [approval] = await approvalsFor(threadId);
+
+    await asUser.mutation(api.approvals.reject, { approvalId: approval._id, reason: "Wrong tone" });
+    await t.finishAllScheduledFunctions(vi.runAllTimers, 500);
+
+    expect(await outbound(threadId)).toEqual([]);
+    const { run, steps } = await latestRun(threadId);
+    expect(run.status).toBe("rejected");
+    expect(steps.at(-1)?.output).toMatch(/Rejected: Wrong tone. Nothing was sent./);
+    const detail = await asUser.query(api.inbox.getThread, { threadId });
+    expect(detail?.thread.status).toBe("open");
+  });
+
+  test("a proposed ticket is created only after approval, before the reply", async () => {
+    mock.agentTurns = [toolCall("create_ticket", TICKET), toolCall("draft_reply", DRAFT)];
+    const threadId = await simulate();
+    const approvals = await approvalsFor(threadId);
+    const ticket = approvals.find((a) => a.action === "create_ticket")!;
+    const reply = approvals.find((a) => a.action === "send_reply")!;
+    const ticketsBefore = await t.run(async (ctx) => (await ctx.db.query("tickets").collect()).length);
+
+    // The workflow waits on the ticket first.
+    const { steps } = await latestRun(threadId);
+    expect(steps.at(-1)).toMatchObject({ type: "approval", name: "create_ticket", status: "running" });
+
+    await asUser.mutation(api.approvals.approve, { approvalId: ticket._id });
+    await t.finishAllScheduledFunctions(vi.runAllTimers, 500);
+    const created = await t.run((ctx) => ctx.db.query("tickets").order("desc").first());
+    expect(created).toMatchObject({ ...TICKET, status: "open", agentRunId: ticket.runId });
+    expect(await t.run(async (ctx) => (await ctx.db.query("tickets").collect()).length)).toBe(ticketsBefore + 1);
+
+    await asUser.mutation(api.approvals.reject, { approvalId: reply._id, reason: "Will call instead" });
+    await t.finishAllScheduledFunctions(vi.runAllTimers, 500);
+    expect(await outbound(threadId)).toEqual([]);
+  });
+
+  test("a rejected ticket is never created", async () => {
+    mock.agentTurns = [toolCall("create_ticket", TICKET), toolCall("draft_reply", DRAFT)];
+    const threadId = await simulate();
+    const ticket = (await approvalsFor(threadId)).find((a) => a.action === "create_ticket")!;
+    const before = await t.run(async (ctx) => (await ctx.db.query("tickets").collect()).length);
+
+    await asUser.mutation(api.approvals.reject, { approvalId: ticket._id, reason: "Duplicate" });
+    await t.finishAllScheduledFunctions(vi.runAllTimers, 500);
+    expect(await t.run(async (ctx) => (await ctx.db.query("tickets").collect()).length)).toBe(before);
+  });
+
+  test("a decision counts once; double clicks and bad edits are refused", async () => {
+    mock.agentTurns = [toolCall("draft_reply", DRAFT)];
+    const threadId = await simulate();
+    const [approval] = await approvalsFor(threadId);
+
+    await expect(
+      asUser.mutation(api.approvals.approveEdited, { approvalId: approval._id, payload: { subject: "x", body: " " } }),
+    ).rejects.toThrow(/The reply is empty/);
+    await expect(asUser.mutation(api.approvals.reject, { approvalId: approval._id, reason: "" })).rejects.toThrow(
+      /Give a short reason/,
+    );
+    await asUser.mutation(api.approvals.approve, { approvalId: approval._id });
+    await expect(asUser.mutation(api.approvals.approve, { approvalId: approval._id })).rejects.toThrow(
+      /already decided/,
+    );
+    await expect(t.mutation(api.approvals.approve, { approvalId: approval._id })).rejects.toThrow(
+      /Not authenticated/,
+    );
+    await t.finishAllScheduledFunctions(vi.runAllTimers, 500);
+    expect(await outbound(threadId)).toHaveLength(1);
+  });
+
+  test("an escalated run asks for nothing", async () => {
+    mock.agentTurns = [toolCall("escalate_to_human", { reason: "Legal threat" })];
+    const threadId = await simulate();
+    expect(await approvalsFor(threadId)).toEqual([]);
+    expect((await latestRun(threadId)).run.status).toBe("escalated");
   });
 });
