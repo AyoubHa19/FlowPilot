@@ -10,7 +10,8 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit && tsc --noEmit -p convex",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "generate:import-csv": "node scripts/generate-import-csv.mjs"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",

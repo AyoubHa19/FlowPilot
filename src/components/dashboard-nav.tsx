@@ -7,8 +7,11 @@ import { TenantSearch } from "@/components/tenant-search";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Inbox, Approvals and Imports join this list in later stages.
-const LINKS = [{ href: "/buildings", label: "Buildings" }];
+// Inbox and Approvals join this list in later stages.
+const LINKS = [
+  { href: "/buildings", label: "Buildings" },
+  { href: "/imports", label: "Imports" },
+];
 
 export function DashboardNav() {
   const pathname = usePathname();
