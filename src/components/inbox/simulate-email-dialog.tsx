@@ -27,6 +27,7 @@ const schema = z.object({
   fromName: z.string().trim().max(100).optional(),
   subject: z.string().trim().min(1, "Enter a subject").max(200),
   body: z.string().trim().min(1, "Write the email").max(10_000),
+  forceToolFailure: z.boolean(),
 });
 
 /** Creates an inbound email without Gmail, for demos and when OAuth expired. */
@@ -44,6 +45,7 @@ export function SimulateEmailDialog() {
       fromName: form.get("fromName")?.toString() || undefined,
       subject: form.get("subject"),
       body: form.get("body"),
+      forceToolFailure: form.get("forceToolFailure") === "on",
     });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
@@ -99,6 +101,15 @@ export function SimulateEmailDialog() {
               defaultValue={"Hello,\n\nthe heating in my flat has not worked since yesterday evening. Can someone come and look at it?\n\nThanks,\nFelix"}
             />
           </div>
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" name="forceToolFailure" className="mt-0.5" />
+            <span>
+              Force a tool failure
+              <span className="block text-xs text-muted-foreground">
+                The lease search fails on its first attempt, to show the run retrying that step.
+              </span>
+            </span>
+          </label>
           <DialogFooter>
             <Button type="submit" disabled={pending}>
               {pending ? "Sending…" : "Add to inbox"}

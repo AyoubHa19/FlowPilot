@@ -9,6 +9,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../../../convex/_generated/api";
 import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
+import { AgentRunCard } from "@/components/inbox/agent-run-card";
 import { NotFound } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,8 @@ import { formatDateTime } from "@/lib/time";
 export default function ThreadPage() {
   const { threadId } = useParams<{ threadId: string }>();
   const detail = useQuery(api.inbox.getThread, { threadId });
+  // "Use draft" remounts the reply form with the agent's text.
+  const [draft, setDraft] = useState<{ body: string; version: number } | null>(null);
 
   if (detail === null) return <NotFound what="Conversation" />;
   if (detail === undefined) {
@@ -59,7 +62,17 @@ export default function ThreadPage() {
         ))}
       </ol>
 
-      <ReplyForm threadId={thread._id} simulated={thread.simulated} />
+      <AgentRunCard
+        threadId={thread._id}
+        onUseDraft={(body) => setDraft((d) => ({ body, version: (d?.version ?? 0) + 1 }))}
+      />
+
+      <ReplyForm
+        key={draft?.version ?? 0}
+        threadId={thread._id}
+        simulated={thread.simulated}
+        initialBody={draft?.body ?? ""}
+      />
     </>
   );
 }
@@ -89,9 +102,17 @@ function MessageBubble({ message }: { message: Doc<"emailMessages"> }) {
   );
 }
 
-function ReplyForm({ threadId, simulated }: { threadId: Id<"emailThreads">; simulated: boolean }) {
+function ReplyForm({
+  threadId,
+  simulated,
+  initialBody,
+}: {
+  threadId: Id<"emailThreads">;
+  simulated: boolean;
+  initialBody: string;
+}) {
   const queueReply = useMutation(api.inbox.queueReply);
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState(initialBody);
   const [pending, setPending] = useState(false);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
