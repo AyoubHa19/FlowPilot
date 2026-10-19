@@ -4,8 +4,12 @@ import { v } from "convex/values";
 import {
   documentKind,
   documentStatus,
+  gmailAccountStatus,
   importJobStatus,
   leaseStatus,
+  messageDirection,
+  sendStatus,
+  threadStatus,
   ticketCategory,
   ticketPriority,
   ticketStatus,
@@ -104,6 +108,72 @@ export default defineSchema({
       dimensions: 768,
       filterFields: ["tenantId"],
     }),
+
+  // --- Email ---------------------------------------------------------------
+
+  // The connected test inbox. Tokens are AES-GCM encrypted with
+  // TOKEN_ENCRYPTION_KEY and never returned by a public query.
+  gmailAccounts: defineTable({
+    email: v.string(),
+    refreshToken: v.string(),
+    accessToken: v.optional(v.string()),
+    accessTokenExpiresAt: v.optional(v.number()),
+    // Gmail history cursor: sync asks only for what changed since.
+    historyId: v.optional(v.string()),
+    status: gmailAccountStatus,
+    connectedAt: v.number(),
+    lastSyncAt: v.optional(v.number()),
+    lastError: v.optional(v.string()),
+    // Stops two cron runs from syncing at the same time.
+    syncLockUntil: v.optional(v.number()),
+  }).index("by_email", ["email"]),
+
+  // One-time CSRF tokens for the OAuth redirect, valid for 10 minutes.
+  oauthStates: defineTable({
+    state: v.string(),
+    userId: v.id("users"),
+    expiresAt: v.number(),
+  }).index("by_state", ["state"]),
+
+  emailThreads: defineTable({
+    subject: v.string(),
+    // Gmail's thread id, or "sim-…" for a simulated thread.
+    gmailThreadId: v.string(),
+    status: threadStatus,
+    lastMessageAt: v.number(),
+    // The tenant behind counterpartEmail, when the sender is known.
+    tenantId: v.optional(v.id("tenants")),
+    counterpartEmail: v.string(),
+    counterpartName: v.optional(v.string()),
+    snippet: v.string(),
+    simulated: v.boolean(),
+  })
+    .index("by_gmail_thread", ["gmailThreadId"])
+    .index("by_last_message", ["lastMessageAt"])
+    .index("by_tenant", ["tenantId", "lastMessageAt"]),
+
+  // Plain text only: email HTML is converted to text on ingest and never
+  // stored or rendered.
+  emailMessages: defineTable({
+    threadId: v.id("emailThreads"),
+    direction: messageDirection,
+    from: v.string(),
+    fromEmail: v.string(),
+    to: v.string(),
+    subject: v.string(),
+    bodyText: v.string(),
+    // Unique per message: polling the inbox twice is safe.
+    gmailMessageId: v.string(),
+    // RFC 822 Message-ID / References, for In-Reply-To threading.
+    rfcMessageId: v.optional(v.string()),
+    references: v.optional(v.string()),
+    receivedAt: v.number(),
+    // Outbound only.
+    sendStatus: v.optional(sendStatus),
+    sendError: v.optional(v.string()),
+  })
+    .index("by_thread", ["threadId", "receivedAt"])
+    .index("by_gmail_message", ["gmailMessageId"]),
 
   // --- Background jobs -----------------------------------------------------
 

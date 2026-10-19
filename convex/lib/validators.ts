@@ -28,6 +28,22 @@ export const documentStatus = v.union(
 );
 export type DocumentStatus = Infer<typeof documentStatus>;
 
+export const gmailAccountStatus = v.union(
+  v.literal("connected"),
+  v.literal("needs_reconnect"),
+);
+
+export const threadStatus = v.union(
+  v.literal("open"),
+  v.literal("replied"),
+  v.literal("closed"),
+);
+export type ThreadStatus = Infer<typeof threadStatus>;
+
+export const messageDirection = v.union(v.literal("inbound"), v.literal("outbound"));
+
+export const sendStatus = v.union(v.literal("sending"), v.literal("sent"), v.literal("failed"));
+
 export const ticketCategory = v.union(
   v.literal("plumbing"),
   v.literal("electrical"),
