@@ -9,6 +9,7 @@
  */
 
 import type * as agent from "../agent.js";
+import type * as approvals from "../approvals.js";
 import type * as auth from "../auth.js";
 import type * as buildings from "../buildings.js";
 import type * as crons from "../crons.js";
@@ -24,6 +25,7 @@ import type * as lib_validators from "../lib/validators.js";
 import type * as lib_workflow from "../lib/workflow.js";
 import type * as model_agentRuns from "../model/agentRuns.js";
 import type * as model_agentTools from "../model/agentTools.js";
+import type * as model_approvals from "../model/approvals.js";
 import type * as model_documents from "../model/documents.js";
 import type * as model_embeddings from "../model/embeddings.js";
 import type * as model_gmailApi from "../model/gmailApi.js";
@@ -48,6 +50,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   agent: typeof agent;
+  approvals: typeof approvals;
   auth: typeof auth;
   buildings: typeof buildings;
   crons: typeof crons;
@@ -63,6 +66,7 @@ declare const fullApi: ApiFromModules<{
   "lib/workflow": typeof lib_workflow;
   "model/agentRuns": typeof model_agentRuns;
   "model/agentTools": typeof model_agentTools;
+  "model/approvals": typeof model_approvals;
   "model/documents": typeof model_documents;
   "model/embeddings": typeof model_embeddings;
   "model/gmailApi": typeof model_gmailApi;

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import {
   action,
   type ActionCtx,
@@ -325,58 +325,64 @@ export const markFailed = internalMutation({
   },
 });
 
+export type Delivery = { ok: true; gmailMessageId: string } | { ok: false; error: string };
+
 /**
- * Sends a queued outbound message as a reply in the same Gmail thread.
- * Not retried automatically: a retry after Gmail accepted the message would
- * send it twice. A failure is shown on the message instead.
+ * Sends a queued outbound message as a reply in the same Gmail thread (or
+ * marks it sent for a simulated thread). Used by manual replies and by
+ * approved agent replies. Never retried automatically: a retry after Gmail
+ * accepted the message would send it twice. A failure is recorded on the
+ * message instead.
  */
+export async function deliverMessage(
+  ctx: ActionCtx,
+  messageId: Id<"emailMessages">,
+): Promise<Delivery | null> {
+  const context = await ctx.runQuery(internal.gmail.sendContext, { messageId });
+  if (context === null || context.message.sendStatus !== "sending") return null;
+  const { message, thread, inbound, account } = context;
+
+  if (thread.simulated) {
+    const gmailMessageId = `sim-${messageId}`;
+    await ctx.runMutation(internal.gmail.markSent, { messageId, gmailMessageId, from: message.from });
+    return { ok: true, gmailMessageId };
+  }
+  try {
+    if (account === null || account.status !== "connected") {
+      throw new Error("Gmail is not connected");
+    }
+    const accessToken = await accessTokenFor(ctx, account);
+    const to = thread.counterpartName
+      ? `${thread.counterpartName} <${thread.counterpartEmail}>`
+      : thread.counterpartEmail;
+    const mime = buildReplyMime({
+      from: account.email,
+      to,
+      subject: message.subject,
+      body: message.bodyText,
+      inReplyTo: inbound?.rfcMessageId,
+      references: inbound?.references,
+    });
+    const sent = await sendRaw(
+      accessToken,
+      bytesToBase64Url(new TextEncoder().encode(mime)),
+      thread.gmailThreadId,
+    );
+    await ctx.runMutation(internal.gmail.markSent, { messageId, gmailMessageId: sent.id, from: account.email });
+    return { ok: true, gmailMessageId: sent.id };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    if (error instanceof GmailAuthError && account) {
+      await ctx.runMutation(internal.gmail.markNeedsReconnect, { accountId: account._id, error: reason });
+    }
+    await ctx.runMutation(internal.gmail.markFailed, { messageId, error: reason });
+    return { ok: false, error: reason };
+  }
+}
+
 export const sendReply = internalAction({
   args: { messageId: v.id("emailMessages") },
   handler: async (ctx, { messageId }) => {
-    const context = await ctx.runQuery(internal.gmail.sendContext, { messageId });
-    if (context === null || context.message.sendStatus !== "sending") return;
-    const { message, thread, inbound, account } = context;
-
-    if (thread.simulated) {
-      await ctx.runMutation(internal.gmail.markSent, {
-        messageId,
-        gmailMessageId: `sim-${messageId}`,
-        from: message.from,
-      });
-      return;
-    }
-    try {
-      if (account === null || account.status !== "connected") {
-        throw new Error("Gmail is not connected");
-      }
-      const accessToken = await accessTokenFor(ctx, account);
-      const to = thread.counterpartName
-        ? `${thread.counterpartName} <${thread.counterpartEmail}>`
-        : thread.counterpartEmail;
-      const mime = buildReplyMime({
-        from: account.email,
-        to,
-        subject: thread.subject,
-        body: message.bodyText,
-        inReplyTo: inbound?.rfcMessageId,
-        references: inbound?.references,
-      });
-      const sent = await sendRaw(
-        accessToken,
-        bytesToBase64Url(new TextEncoder().encode(mime)),
-        thread.gmailThreadId,
-      );
-      await ctx.runMutation(internal.gmail.markSent, {
-        messageId,
-        gmailMessageId: sent.id,
-        from: account.email,
-      });
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      if (error instanceof GmailAuthError && account) {
-        await ctx.runMutation(internal.gmail.markNeedsReconnect, { accountId: account._id, error: reason });
-      }
-      await ctx.runMutation(internal.gmail.markFailed, { messageId, error: reason });
-    }
+    await deliverMessage(ctx, messageId);
   },
 });

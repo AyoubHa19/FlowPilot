@@ -1,8 +1,49 @@
-import type { Id } from "../_generated/dataModel";
+import { ConvexError } from "convex/values";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { startAgentRun } from "./agentRuns";
 import { parseAddress, snippetOf } from "./mime";
 import { findTenantByEmail } from "./properties";
+
+/** The "inbox" address of simulated conversations. */
+export const SIMULATED_INBOX = "inbox@flowpilot.demo";
+
+/**
+ * Writes an outbound reply in "sending" state; the caller then delivers it
+ * (gmail.deliverMessage). The row exists before Gmail is called, so the UI
+ * shows it at once and a failure is recorded on it.
+ */
+export async function queueOutbound(
+  ctx: MutationCtx,
+  thread: Doc<"emailThreads">,
+  reply: { subject: string; body: string },
+) {
+  const account = await ctx.db.query("gmailAccounts").first();
+  if (!thread.simulated && account?.status !== "connected") {
+    throw new ConvexError("Connect Gmail first");
+  }
+  const now = Date.now();
+  const from = thread.simulated ? SIMULATED_INBOX : account!.email;
+  const messageId = await ctx.db.insert("emailMessages", {
+    threadId: thread._id,
+    direction: "outbound",
+    from,
+    fromEmail: from,
+    to: thread.counterpartEmail,
+    subject: reply.subject,
+    bodyText: reply.body,
+    // Placeholder until Gmail returns the real id.
+    gmailMessageId: `pending-${crypto.randomUUID()}`,
+    receivedAt: now,
+    sendStatus: "sending",
+  });
+  await ctx.db.patch(thread._id, {
+    status: "replied",
+    lastMessageAt: now,
+    snippet: reply.body.slice(0, 140),
+  });
+  return messageId;
+}
 
 export type IncomingMessage = {
   gmailMessageId: string;

@@ -13,6 +13,7 @@ import { requireUserId } from "./lib/auth";
 import { agentStepStatus, agentStepType, emailCategory, urgency } from "./lib/validators";
 import { STEP_RETRY, workflow } from "./lib/workflow";
 import { executeTool, type RunScope, toolSetForModel } from "./model/agentTools";
+import { approvalEvent } from "./model/approvals";
 import {
   AGENT_PROVIDER_OPTIONS,
   agentModelFor,
@@ -149,6 +150,19 @@ export const runAgent = workflow.define({
       }
       if (finished) break;
       messages = [...messages, { role: "tool", content: results }];
+    }
+
+    // 4. Approvals: the draft becomes a send_reply proposal. The workflow
+    // sleeps on an event per proposal (no compute, for as long as it takes)
+    // and executes only what a person approved.
+    const pending = await step.runMutation(internal.approvals.collectForRun, {
+      runId,
+      stepIndex: index++,
+    });
+    for (const { approvalId } of pending) {
+      await step.runMutation(internal.approvals.startWaiting, { approvalId, stepIndex: index++ });
+      await step.awaitEvent({ name: approvalEvent(approvalId) });
+      await step.runAction(internal.approvals.execute, { approvalId });
     }
 
     await step.runMutation(internal.agent.finishRun, { runId });
@@ -292,7 +306,7 @@ export const runTool = internalAction({
       if (failToolOnce === toolName && attempt === 1) {
         throw new Error(`Injected failure for testing (${toolName}, attempt 1)`);
       }
-      const result = await executeTool(ctx, scope, toolName, input);
+      const result = await executeTool(ctx, { ...scope, stepIndex }, toolName, input);
       await ctx.runMutation(internal.agent.finishStep, {
         runId, index: stepIndex, status: "succeeded", output: logged(result.output),
         durationMs: Date.now() - startedAt, countToolCall: counted === true,
@@ -433,15 +447,30 @@ export const escalate = internalMutation({
   },
 });
 
+/**
+ * Final status from what the human decided on the reply: completed (sent),
+ * rejected (nothing sent) or failed (sending failed). Escalated runs never
+ * had a reply proposal.
+ */
 export const finishRun = internalMutation({
   args: { runId: v.id("agentRuns") },
   handler: async (ctx, { runId }) => {
     const run = (await ctx.db.get(runId))!;
-    await ctx.db.patch(runId, {
-      status: run.escalationReason ? "escalated" : run.draft ? "drafted" : "failed",
-      ...(!run.escalationReason && !run.draft && { error: "Finished without a draft" }),
-      finishedAt: Date.now(),
-    });
+    const approvals = await ctx.db
+      .query("approvals")
+      .withIndex("by_run", (q) => q.eq("runId", runId))
+      .collect();
+    const reply = approvals.find((a) => a.action === "send_reply");
+    let status: "escalated" | "completed" | "rejected" | "failed";
+    let error: string | undefined;
+    if (run.escalationReason) status = "escalated";
+    else if (reply?.status === "executed") status = "completed";
+    else if (reply?.status === "rejected") status = "rejected";
+    else {
+      status = "failed";
+      error = reply?.error ?? "Finished without a reply";
+    }
+    await ctx.db.patch(runId, { status, error, finishedAt: Date.now() });
   },
 });
 
@@ -513,6 +542,34 @@ export const openTickets = internalQuery({
 });
 
 // --- Dashboard -------------------------------------------------------------
+
+/** Everything the live run timeline page shows, in one subscription. */
+export const runTimeline = query({
+  args: { runId: v.string() },
+  handler: async (ctx, args) => {
+    await requireUserId(ctx);
+    const runId = ctx.db.normalizeId("agentRuns", args.runId);
+    const run = runId && (await ctx.db.get(runId));
+    if (!run) return null;
+    const [steps, thread, tenant, message] = await Promise.all([
+      ctx.db
+        .query("agentSteps")
+        .withIndex("by_run_index", (q) => q.eq("runId", run._id))
+        .collect(),
+      ctx.db.get(run.threadId),
+      run.tenantId ? ctx.db.get(run.tenantId) : null,
+      ctx.db.get(run.messageId),
+    ]);
+    const { failToolOnce: _f, workflowId: _w, ...visible } = run;
+    return {
+      run: visible,
+      steps,
+      thread: thread && { _id: thread._id, subject: thread.subject, simulated: thread.simulated },
+      tenant: tenant && { _id: tenant._id, name: tenant.name },
+      email: message && { from: message.from, receivedAt: message.receivedAt },
+    };
+  },
+});
 
 /** The latest run for a thread, with its steps in order. */
 export const runForThread = query({

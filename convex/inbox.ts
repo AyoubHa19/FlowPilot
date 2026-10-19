@@ -3,11 +3,11 @@ import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
-import { ingestMessage } from "./model/inbox";
+import { ingestMessage, queueOutbound, SIMULATED_INBOX } from "./model/inbox";
+import { replySubject } from "./model/mime";
 import { normalizeEmail } from "./model/properties";
 
 const MAX_BODY_CHARS = 10_000;
-const SIMULATED_INBOX = "inbox@flowpilot.demo";
 
 /** Newest conversation first, with the tenant's name when known. */
 export const listThreads = query({
@@ -105,27 +105,7 @@ export const queueReply = mutation({
     }
     const thread = await ctx.db.get(threadId);
     if (thread === null) throw new ConvexError("Conversation not found");
-    const account = await ctx.db.query("gmailAccounts").first();
-    if (!thread.simulated && account?.status !== "connected") {
-      throw new ConvexError("Connect Gmail first");
-    }
-
-    const now = Date.now();
-    const from = thread.simulated ? SIMULATED_INBOX : account!.email;
-    const messageId = await ctx.db.insert("emailMessages", {
-      threadId,
-      direction: "outbound",
-      from,
-      fromEmail: from,
-      to: thread.counterpartEmail,
-      subject: thread.subject,
-      bodyText: text,
-      // Placeholder until Gmail returns the real id.
-      gmailMessageId: `pending-${crypto.randomUUID()}`,
-      receivedAt: now,
-      sendStatus: "sending",
-    });
-    await ctx.db.patch(threadId, { status: "replied", lastMessageAt: now, snippet: text.slice(0, 140) });
+    const messageId = await queueOutbound(ctx, thread, { subject: replySubject(thread.subject), body: text });
     await ctx.scheduler.runAfter(0, internal.gmail.sendReply, { messageId });
     return messageId;
   },

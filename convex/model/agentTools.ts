@@ -3,6 +3,7 @@ import { z } from "zod";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { ActionCtx } from "../_generated/server";
+import { ticketPayloadSchema } from "./approvals";
 import { embedQuery } from "./embeddings";
 import { normalizeEmail } from "./properties";
 import { searchTenantChunks } from "./search";
@@ -17,13 +18,18 @@ export type RunScope = {
   threadId: Id<"emailThreads">;
   senderEmail: string;
   tenantId?: Id<"tenants">;
+  /** The timeline step running this call (dedupe key for proposals). */
+  stepIndex?: number;
 };
 
 type ToolDefinition<Schema extends z.ZodType> = {
   name: string;
   description: string;
   inputSchema: Schema;
-  /** Side-effect tools pause for a human decision (Stage 6). */
+  /**
+   * Side-effect tools never act directly: their handler only records a
+   * proposal, and the workflow executes it after a human approves.
+   */
   requiresApproval: boolean;
   /** Ends the act loop once it succeeds. */
   terminal?: boolean;
@@ -92,9 +98,25 @@ export const TOOLS = [
     },
   }),
   define({
+    name: "create_ticket",
+    description:
+      "Propose a repair ticket for the sender's unit. A person approves it before it is created. Use only for a new problem that no open ticket already covers.",
+    inputSchema: ticketPayloadSchema,
+    requiresApproval: true,
+    handler: async (ctx, scope, ticket): Promise<unknown> => {
+      if (!scope.tenantId) return UNKNOWN_SENDER;
+      await ctx.runMutation(internal.approvals.proposeFromTool, {
+        runId: scope.runId,
+        stepIndex: scope.stepIndex ?? -1,
+        payload: ticket,
+      });
+      return { proposed: true, note: "Waiting for a person to approve. Mention in the reply that the repair is being arranged." };
+    },
+  }),
+  define({
     name: "draft_reply",
     description:
-      "Save the reply draft for a human to review. Call exactly once, at the end. Nothing is sent.",
+      "Finish with the reply. Call exactly once, at the end. It becomes a send_reply proposal that a person approves, edits or rejects; nothing is sent before that.",
     inputSchema: z.object({
       subject: z.string().trim().min(1).max(200),
       body: z.string().trim().min(1).max(5000),
