@@ -14,12 +14,12 @@ import { agentStepStatus, agentStepType, emailCategory, urgency } from "./lib/va
 import { STEP_RETRY, workflow } from "./lib/workflow";
 import { executeTool, type RunScope, toolSetForModel } from "./model/agentTools";
 import {
-  AGENT_MODEL,
   AGENT_PROVIDER_OPTIONS,
-  agentModel,
+  agentModelFor,
   CLASSIFIER_MODEL,
   classifierModel,
   costUsd,
+  LLM_TIMEOUT_MS,
   MAX_TOOL_CALLS,
   TOKEN_CAP_PER_RUN,
 } from "./model/llm";
@@ -189,6 +189,7 @@ export const classify = internalAction({
         output: Output.object({ schema: classificationSchema }),
         // Retries belong to the workflow step, where they are logged.
         maxRetries: 0,
+        abortSignal: AbortSignal.timeout(LLM_TIMEOUT_MS),
       });
       const classification = classificationSchema.parse(result.output);
       const tokensIn = result.usage.inputTokens ?? 0;
@@ -221,18 +222,21 @@ export const llmTurn = internalAction({
     if (tokensUsed >= TOKEN_CAP_PER_RUN) {
       return { overBudget: true, responseMessages: [], toolCalls: [], text: "" };
     }
-    await ctx.runMutation(internal.agent.startStep, {
+    const attempt = await ctx.runMutation(internal.agent.startStep, {
       runId, index: stepIndex, type: "llm", name: "agent", input: logged(messages.at(-1)),
     });
+    const { id: modelId, model } = agentModelFor(attempt);
     const startedAt = Date.now();
     try {
       const result = await generateText({
-        model: agentModel(),
+        model,
         system: agentSystemPrompt(language),
         messages: messages as ModelMessage[],
         tools: toolSetForModel(),
         providerOptions: AGENT_PROVIDER_OPTIONS,
+        // Retries belong to the workflow step (logged, with a fallback model).
         maxRetries: 0,
+        abortSignal: AbortSignal.timeout(LLM_TIMEOUT_MS),
       });
       const toolCalls = result.toolCalls.map((c) => ({
         toolCallId: c.toolCallId,
@@ -243,9 +247,12 @@ export const llmTurn = internalAction({
       const tokensOut = result.usage.outputTokens ?? 0;
       await ctx.runMutation(internal.agent.finishStep, {
         runId, index: stepIndex, status: "succeeded",
-        output: logged(toolCalls.length ? toolCalls.map((c) => ({ tool: c.toolName, input: c.input })) : result.text),
+        output: logged({
+          model: modelId,
+          result: toolCalls.length ? toolCalls.map((c) => ({ tool: c.toolName, input: c.input })) : result.text,
+        }),
         durationMs: Date.now() - startedAt, tokensIn, tokensOut,
-        costUsd: costUsd(AGENT_MODEL, tokensIn, tokensOut),
+        costUsd: costUsd(modelId, tokensIn, tokensOut),
       });
       return {
         overBudget: false,

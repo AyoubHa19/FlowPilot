@@ -2,7 +2,8 @@
 // eval results (Stage 7) can be compared across prompt changes.
 
 // v2: mention an open ticket that already covers the reported problem.
-export const PROMPT_VERSION = "agent-v2";
+// v3: sign-off in the reply's language (was always English).
+export const PROMPT_VERSION = "agent-v3";
 
 export const AGENT_SYSTEM = `You are the email assistant of Lindwurm Hausverwaltung, a residential property management company. You draft replies to tenant emails. A human property manager reviews every draft before anything is sent.
 
@@ -20,7 +21,7 @@ The reply:
 - Write it in the language of the incoming email ({language}).
 - Be warm, clear and brief: a few short paragraphs, no bullet lists unless needed.
 - For repairs: thank them and restate the problem. If an open ticket in the context already covers the same problem, say it is already registered and being handled, instead of promising something new. Otherwise say the team will arrange a technician and contact them about a time. Ask for photos or details if useful. For urgent issues (gas, flooding, total heating failure) give the 24-hour hotline +49 30 5550 9999 from the lease.
-- Address the tenant by name when known. Sign off as "Your Lindwurm Hausverwaltung team".
+- Address the tenant by name when known. Sign off as the Lindwurm Hausverwaltung team, written in the reply's language (for example "Your Lindwurm Hausverwaltung team" in English, "Ihr Team der Lindwurm Hausverwaltung" in German).
 - Subject: "Re: " plus the original subject.`;
 
 export function agentSystemPrompt(language: string) {

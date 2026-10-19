@@ -5,14 +5,25 @@ import type { LanguageModel } from "ai";
 // Switching provider (e.g. to Claude) means changing these two factories.
 export const AGENT_MODEL = "gemini-3.8-flash";
 export const CLASSIFIER_MODEL = "gemini-3.5-flash-lite";
+/**
+ * Used when the agent step is retried: under "high demand" errors the main
+ * model can stay overloaded for minutes, and a run should still finish in
+ * about a minute (PRD success criterion).
+ */
+export const AGENT_FALLBACK_MODEL = "gemini-3.5-flash-lite";
+
+/** A call slower than this is aborted and retried by the workflow step. */
+export const LLM_TIMEOUT_MS = 20_000;
 
 /** Low thinking: enough for tool use, and output tokens include thinking. */
 export const AGENT_PROVIDER_OPTIONS = {
   google: { thinkingConfig: { thinkingLevel: "low" as const } },
 };
 
-export function agentModel(): LanguageModel {
-  return google(AGENT_MODEL);
+/** The main model on a first attempt, the fallback on retries. */
+export function agentModelFor(attempt: number): { id: string; model: LanguageModel } {
+  const id = attempt > 1 ? AGENT_FALLBACK_MODEL : AGENT_MODEL;
+  return { id, model: google(id) };
 }
 
 export function classifierModel(): LanguageModel {
