@@ -115,3 +115,39 @@ One short entry per technical choice, newest last.
 - **Sample leases vary per tenant** (rent, dates, pets, parking), so the search
   test proves it returns *that* tenant's clause: "Can I keep a dog?" returns
   "may keep one dog and one cat" for Anna and "no dogs or cats" for Felix.
+
+## Stage 4 — Email in and out
+
+- **OAuth through Convex HTTP actions, not Next.js routes.** The redirect URI
+  is the Convex site URL (`…convex.site/gmail/oauth/callback`), which is HTTPS
+  even in local development, so Google accepts it and the client secret never
+  touches the frontend. A one-time `state` row (10-minute expiry, single use)
+  protects the callback against CSRF.
+- **One scope: `gmail.modify`.** It covers reading and sending, which is all
+  the MVP needs; the app stays in Google's Testing mode with one test user, so
+  no verification is required. Trade-off: refresh tokens expire after ~7 days,
+  handled by a "Reconnect Gmail" state and the simulate-email form.
+- **Tokens encrypted at rest** with AES-256-GCM (Web Crypto) and a key in the
+  Convex environment. A leaked database export alone cannot read the inbox. No
+  public query returns tokens.
+- **Polling with the history API, not Pub/Sub push.** A one-minute cron (about
+  43,000 runs a month, inside the free tier) asks Gmail only for messages added
+  since the stored `historyId`. Push would need a public Pub/Sub topic and
+  webhook verification; the PRD's "within a minute" goal does not need it. A
+  lock on the account row stops overlapping runs; a stale cursor falls back to
+  the last two days of inbox.
+- **Dedupe on `gmailMessageId`** (index + a check inside the ingest
+  transaction), so overlapping or repeated syncs store each message once.
+- **Plain text only.** text/plain is preferred; HTML-only mail is converted to
+  text on ingest and the HTML is discarded, so the dashboard never renders
+  email HTML (PRD security rule) and the agent gets clean text.
+- **Replies stay in the thread** by sending with the Gmail `threadId` plus
+  `In-Reply-To` / `References` from the tenant's last message. Header values
+  are stripped of newlines (no header injection) and subjects are RFC 2047
+  encoded for umlauts.
+- **Sending is never retried blindly.** The outbound row is written first
+  ("sending"), then the action sends once. Only a 429 is retried, because a
+  5xx or dropped connection may already have delivered the mail and a retry
+  would send it twice. Failures stay visible on the message.
+- **Simulated threads share the real pipeline** (same ingest, threading and
+  tenant linking) but never call Gmail, so demos work even when OAuth expired.

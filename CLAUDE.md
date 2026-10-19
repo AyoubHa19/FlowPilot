@@ -24,7 +24,12 @@ back on in Stage 7.
   Workpool → Node action (unpdf → chunkText → Gemini `gemini-embedding-2`,
   768 dims) → `docChunks` with a vector index filtered by `tenantId`.
   50 PDFs process in ~40s; search is tenant-scoped.
-- Next: **Stage 4: Email in and out (Gmail).**
+- **Stage 4: Email in and out — done.** Gmail OAuth via Convex HTTP actions
+  (test inbox bnaybir1@gmail.com, Google Cloud project `dacc-512019`, Testing
+  mode), encrypted tokens, minute cron sync on the history API, dedupe by
+  gmailMessageId, tenant linking, replies in the same Gmail thread, and a
+  simulate-email form for demos.
+- Next: **Stage 5: Agent engine.**
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
@@ -41,19 +46,24 @@ the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
 ## Folder layout
 
 ```
-convex/             backend: schema, public functions (buildings, tenants, imports, documents)
+convex/             backend: schema, public functions (buildings, tenants, imports,
+                    documents, inbox, gmail)
   documentsNode.ts  "use node" PDF processing action (unpdf)
+  http.ts           Convex Auth routes + /gmail/oauth/callback
+  crons.ts          gmail inbox sync, every minute
   convex.config.ts  components: importPool, documentPool (Workpool)
-  lib/              auth helper (requireUserId), shared validators
+  lib/              auth helper (requireUserId), validators, crypto (AES-GCM tokens)
   model/            plain functions: upserts, CSV row schema, chunker,
-                    embeddings (Gemini), tenant-scoped vector search
+                    embeddings (Gemini), vector search, Gmail REST client,
+                    MIME parse/build, inbox ingest
   seed.ts           internal seed mutation (data in seedData.ts)
   *.test.ts         convex-test unit tests (modules via test.setup.ts)
   _generated/       written by `npx convex dev`, never edit
 scripts/            node scripts writing test data to samples/ (gitignored)
-src/app/            Next.js routes: /signin, (dashboard)/buildings, /tenants/[id], /imports, /documents
+src/app/            Next.js routes: /signin, (dashboard)/inbox, /inbox/[id], /buildings,
+                    /tenants/[id], /imports, /documents
 src/components/     app components; ui/ is shadcn (generated, edit sparingly)
-src/lib/            format.ts (cents → €, ISO dates), download.ts (CSV download)
+src/lib/            format.ts (cents → €, ISO dates), time.ts (x ago), download.ts
 src/proxy.ts        Next 16 "proxy" (formerly middleware): optimistic auth redirects
 docs/decisions.md   one short entry per technical choice
 ```
@@ -74,7 +84,13 @@ npx convex run documents:reindex   # re-chunk + re-embed all documents
 ```
 
 Secrets on the Convex dev deployment: `GOOGLE_GENERATIVE_AI_API_KEY` (Gemini),
-plus the Convex Auth keys. Never print their values.
+`GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` (Gmail OAuth client),
+`TOKEN_ENCRYPTION_KEY` (32 bytes base64, encrypts Gmail tokens), plus the
+Convex Auth keys. Never print their values.
+
+The Gmail OAuth app is in Testing mode, so Google expires the refresh token
+after ~7 days: the inbox card then shows "Reconnect Gmail". Simulated threads
+(`simulated: true`) never call Gmail.
 
 On this Windows checkout the Next.js dev server sometimes misses edits to
 components rendered by the `(dashboard)` layout (e.g. `dashboard-nav.tsx`) and
