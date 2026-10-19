@@ -3,8 +3,10 @@
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { BotIcon, CheckIcon, CircleAlertIcon, LoaderIcon, WrenchIcon } from "lucide-react";
+import Link from "next/link";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { ApprovalCard } from "@/components/approvals/approval-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +39,7 @@ export function AgentRunCard({
   onUseDraft: (body: string) => void;
 }) {
   const data = useQuery(api.agent.runForThread, { threadId });
+  const approvals = useQuery(api.approvals.forRun, data ? { runId: data.run._id } : "skip");
   if (data === undefined) return <Skeleton className="h-40" />;
   if (data === null) return null;
 
@@ -48,11 +51,14 @@ export function AgentRunCard({
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-center gap-2">
         <BotIcon className="size-4" />
-        <CardTitle className="mr-auto">Agent run</CardTitle>
+        <CardTitle>Agent run</CardTitle>
         <Badge variant={statusVariant(run.status)}>
           {running && <LoaderIcon className="animate-spin" />}
           {humanize(run.status)}
         </Badge>
+        <Link href={`/runs/${run._id}`} className="ml-auto text-xs text-muted-foreground hover:underline">
+          Open run timeline →
+        </Link>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 text-sm">
         {run.status === "skipped" ? (
@@ -78,7 +84,16 @@ export function AgentRunCard({
             )}
             {run.error && <p className="text-destructive">Error: {run.error}</p>}
 
-            {run.draft && (
+            {approvals && approvals.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {approvals.map((approval) => (
+                  <ApprovalCard key={approval._id} approval={approval} />
+                ))}
+              </div>
+            )}
+
+            {/* Stage 5 runs ended with a draft and no approval. */}
+            {run.draft && approvals?.length === 0 && (
               <div className="flex flex-col gap-2 rounded-md border p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium">Draft reply</span>
@@ -93,9 +108,6 @@ export function AgentRunCard({
                   </Button>
                 </div>
                 <p className="whitespace-pre-wrap">{run.draft.body}</p>
-                <p className="text-xs text-muted-foreground">
-                  Nothing is sent until you send it yourself. Approvals arrive in Stage 6.
-                </p>
               </div>
             )}
 

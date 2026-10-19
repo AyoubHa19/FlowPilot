@@ -84,6 +84,8 @@ export default function InboxPage() {
                     <Badge variant="outline">Unknown sender</Badge>
                   )}
                   {thread.simulated && <Badge variant="outline">Simulated</Badge>}
+                  {thread.status === "awaiting_approval" && <Badge>Awaiting approval</Badge>}
+                  {thread.status === "needs_human" && <Badge variant="destructive">Needs a person</Badge>}
                   {thread.status === "replied" && <Badge variant="outline">Replied</Badge>}
                   <span className="tabular-nums">{timeAgo(thread.lastMessageAt, now)}</span>
                 </div>
