@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { api } from "../../../../../convex/_generated/api";
 import type { Doc } from "../../../../../convex/_generated/dataModel";
+import { TenantDocuments } from "@/components/documents/tenant-documents";
 import { EmptyState, NotFound } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -103,6 +104,9 @@ export default function TenantDetailPage() {
           ))}
         </ul>
       )}
+
+      <h2 className="text-lg font-medium">Documents</h2>
+      <TenantDocuments tenantId={tenant._id} />
     </>
   );
 }

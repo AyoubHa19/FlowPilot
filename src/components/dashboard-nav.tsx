@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 // Inbox and Approvals join this list in later stages.
 const LINKS = [
   { href: "/buildings", label: "Buildings" },
+  { href: "/documents", label: "Documents" },
   { href: "/imports", label: "Imports" },
 ];
 
