@@ -195,3 +195,37 @@ One short entry per technical choice, newest last.
 - **Tests drive the real workflow with a scripted mock model**
   (`MockLanguageModelV4`), so retries, fallback, tool limits, the token cap and
   the privacy rules are tested without calling Gemini.
+
+## Stage 6 — Approvals and run timeline
+
+- **The model proposes, the workflow executes.** No tool the model can call
+  has a side effect: `create_ticket` only writes an approval row, and the final
+  `draft_reply` is turned into a `send_reply` approval by the workflow. The
+  ticket insert and the Gmail send live in `approvals.execute`, which runs only
+  for a row marked approved. "Nothing is sent or created without approval" is
+  a property of the code, not of the prompt.
+- **The workflow sleeps on an event per approval** (`awaitEvent`), and the
+  decision mutation wakes it with `sendEvent`. No polling, no compute while
+  waiting, and a run can wait for hours or days. An event sent before the
+  workflow reaches the wait is queued, so a very fast click is not lost.
+- **Proposals are collected, then decided in order.** A ticket proposed in the
+  middle of the loop does not block the draft: the run finishes its draft in
+  ~30s, then waits on the ticket first and the reply second. The wait shows in
+  the timeline as a live step ("Waiting for approval: send_reply").
+- **Edit then approve stores the edit next to the original** (`editedPayload`)
+  and executes the edit. Both stay visible, so a reviewer can see what the
+  manager changed. Edits are validated with the same zod schemas as tool input.
+- **Decisions count once.** A second click on a decided approval is refused,
+  and execution is idempotent: the reply message is queued once per approval
+  (its id is stored on the row), and a delivered message is never re-sent.
+  Sending is still never retried blindly (see Stage 4).
+- **Proposals are keyed by (run, step)**, so a retried tool step cannot
+  propose the same ticket twice.
+- **Reject puts the conversation back to "open"**, because the email still
+  needs an answer; the reason is stored and shown in the timeline.
+- **Live without polling code.** The queue, the nav count, the inline cards
+  and the run timeline are Convex subscriptions; the timeline updated on screen
+  as the approval step started, waited and finished.
+- **Verified live with Gmail:** approve sent the agent's reply into the
+  sender's thread, reject sent nothing; edit-then-approve sent the edited text
+  on a simulated thread and in the unit tests.

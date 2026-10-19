@@ -33,9 +33,15 @@ back on in Stage 7.
   Workflow run: classify (`gemini-3.5-flash-lite`) → context lookups → tool loop
   (`gemini-3.8-flash`, max 8 tool calls, fallback model on retry) → draft.
   Steps, tokens and cost logged in `agentRuns` / `agentSteps`. ~$0.002 and
-  ~30s per run. Prompts in `convex/prompts/` (current: agent-v3).
-- Next: **Stage 6: Approvals and run timeline** (create_ticket and send_reply
-  as approval-gated tools; workflow pauses on an event until a human decides).
+  ~30s per run. Prompts in `convex/prompts/` (current: agent-v4).
+- **Stage 6: Approvals and run timeline — done.** The model only proposes
+  (create_ticket, and the draft becomes send_reply); proposals wait in
+  `approvals`, the workflow sleeps on `awaitEvent("approval:<id>")`, and a
+  decision (approve / edit then approve / reject) wakes it. /approvals queue
+  with a live pending count, inline approval cards, live /runs/[id] timeline.
+  Verified live with Gmail: approve sent, reject sent nothing.
+- Next: **Stage 7: Quality, deploy, portfolio** (eval set of 30 emails, UI
+  states, rate-limit handling, cost per run, production deploy, README, demo).
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
@@ -54,7 +60,8 @@ the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
 ```
 convex/             backend: schema, public functions (buildings, tenants, imports,
                     documents, inbox, gmail, agent)
-  agent.ts          agent workflow (runAgent), steps, run logging
+  agent.ts          agent workflow (runAgent), steps, run logging, runTimeline
+  approvals.ts      approval queue, decide (approve/edit/reject), execute
   prompts/          versioned prompts (classify.ts, agent.ts with PROMPT_VERSION)
   documentsNode.ts  "use node" PDF processing action (unpdf)
   http.ts           Convex Auth routes + /gmail/oauth/callback
@@ -69,8 +76,8 @@ convex/             backend: schema, public functions (buildings, tenants, impor
   *.test.ts         convex-test unit tests (modules via test.setup.ts)
   _generated/       written by `npx convex dev`, never edit
 scripts/            node scripts writing test data to samples/ (gitignored)
-src/app/            Next.js routes: /signin, (dashboard)/inbox, /inbox/[id], /buildings,
-                    /tenants/[id], /imports, /documents
+src/app/            Next.js routes: /signin, (dashboard)/inbox, /inbox/[id], /approvals,
+                    /runs/[id], /buildings, /tenants/[id], /imports, /documents
 src/components/     app components; ui/ is shadcn (generated, edit sparingly)
 src/lib/            format.ts (cents → €, ISO dates), time.ts (x ago), download.ts
 src/proxy.ts        Next 16 "proxy" (formerly middleware): optimistic auth redirects
@@ -122,6 +129,9 @@ serves a stale server render, which shows up as a hydration mismatch. Restart
 - Agent tools never take a tenant id from the model; they are bound to the
   run's sender (`RunScope`). New tools go in `model/agentTools.ts` with a zod
   schema and a `requiresApproval` flag.
+- A side-effect tool's handler only calls `proposeAction`; the effect itself
+  runs in `approvals.execute` after a person approved. Never send email or
+  write tenant data from a tool handler.
 - Changing a prompt: bump `PROMPT_VERSION` in `convex/prompts/agent.ts`.
 - Agent tests mock the model with `MockLanguageModelV4` via `vi.mock("./model/llm")`
   (see `convex/agent.test.ts`); never call Gemini from tests.
