@@ -17,7 +17,10 @@ back on in Stage 7.
   Convex prod `amicable-raccoon-556`; both are stale).
 - **Stage 1: Property data — done.** Schema, idempotent seed, buildings /
   building detail / tenant detail pages, tenant lookup by email.
-- Next: **Stage 2: Bulk import.** Reuse the upserts in `convex/model/properties.ts`.
+- **Stage 2: Bulk import — done.** CSV upload → parse action → 100-row
+  batches on the `importPool` Workpool → live counters on `importJobs`.
+  10,000 rows import in ~2 min; re-import adds nothing.
+- Next: **Stage 3: Documents and knowledge base.**
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
@@ -26,7 +29,7 @@ the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
 
 - Next.js 16 (App Router, `src/`), React 19, Tailwind v4, shadcn/ui (base-nova, Base UI)
 - Convex: queries, mutations, actions, crons, file storage, vector search
-- Convex Workflow + Workpool components for durable jobs (from Stage 2)
+- Convex Workpool (imports, Stage 2) and Workflow (agent runs, Stage 5) components
 - Convex Auth, Password provider
 - Vercel AI SDK + Google Gemini (LLM and embeddings, from Stage 3/5)
 - Gmail API (Stage 4), unpdf, Papa Parse, zod, Vitest + convex-test
@@ -34,15 +37,17 @@ the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
 ## Folder layout
 
 ```
-convex/             backend: schema, public functions (buildings.ts, tenants.ts, ...)
+convex/             backend: schema, public functions (buildings.ts, tenants.ts, imports.ts)
+  convex.config.ts  components: importPool (Workpool)
   lib/              auth helper (requireUserId), shared validators
-  model/            plain functions on ctx: natural-key upserts, lookups
+  model/            plain functions: natural-key upserts, lookups, CSV row schema
   seed.ts           internal seed mutation (data in seedData.ts)
   *.test.ts         convex-test unit tests (modules via test.setup.ts)
   _generated/       written by `npx convex dev`, never edit
-src/app/            Next.js routes: /signin, (dashboard)/buildings, /tenants/[id]
+scripts/            node scripts (generate-import-csv.mjs → samples/, gitignored)
+src/app/            Next.js routes: /signin, (dashboard)/buildings, /tenants/[id], /imports
 src/components/     app components; ui/ is shadcn (generated, edit sparingly)
-src/lib/format.ts   money (cents → €) and ISO date formatting
+src/lib/            format.ts (cents → €, ISO dates), download.ts (CSV download)
 src/proxy.ts        Next 16 "proxy" (formerly middleware): optimistic auth redirects
 docs/decisions.md   one short entry per technical choice
 ```
@@ -57,6 +62,7 @@ npm run lint
 npm test              # vitest + convex-test
 npm run build
 npx convex run seed:run   # idempotent demo data (dev deployment)
+npm run generate:import-csv -- --rows 10000 --broken 3   # test CSV in samples/
 ```
 
 ## Rules

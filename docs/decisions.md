@@ -48,3 +48,34 @@ One short entry per technical choice, newest last.
 - **Dashboard pages are client components on Convex subscriptions**
   (`useQuery`, `usePaginatedQuery`): data updates live and every list is
   paginated from the start.
+
+## Stage 2 — Bulk import
+
+- **One flat CSV, one row per unit** (building + unit + tenant + optional
+  lease). It matches how property managers export from other tools, and the
+  natural keys make every row an independent upsert.
+- **Pipeline: upload → parse action → Workpool batches of 100 rows.** The
+  browser uploads straight to Convex storage. A scheduled action parses the
+  file with Papa Parse and queues one mutation per batch on the `importPool`
+  Workpool (`maxParallelism: 4`, under the free plan's 20). Each batch is a
+  transaction, so a batch is applied fully or not at all and counters never
+  drift.
+- **Running counters on `importJobs`** (`processed`, `failed`, `created`,
+  `total`): the progress bar subscribes to one document. The job completes
+  when `processed + failed === total`.
+- **Bad rows are data, not exceptions.** Each row is validated with zod; a
+  failure inserts an `importRowErrors` row (line number, message, raw row) and
+  the batch moves on. A batch that fails as a whole is caught by a Workpool
+  `onComplete` handler and its rows are counted as failed, so a job can never
+  hang at 99%.
+- **`importRowErrors` is its own table**, not an array on the job: a file with
+  thousands of bad rows would hit Convex's 1 MB document limit. The report is
+  downloaded page by page and rebuilt as a CSV in the browser.
+- **Upserts skip unchanged rows** (`hasChanges`). A re-import writes nothing,
+  and parallel batches stop conflicting on the building row they all read.
+  Measured: 10,000 rows in 114s first time, 107s re-import, 0 new rows.
+- **Parsing in memory, not streamed.** 10,000 rows is 1.6 MB; the upload limit
+  is 20 MB, well inside an action's memory. Streaming would be the next step
+  for much larger files.
+- **Downloaded CSVs start with a UTF-8 BOM** so Excel shows umlauts; the
+  importer trims header names, which strips it again.

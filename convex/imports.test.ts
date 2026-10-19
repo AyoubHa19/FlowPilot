@@ -164,6 +164,24 @@ describe("full pipeline", () => {
     expect((await counts(t)).tenants).toBe(249);
   });
 
+  test("a CSV saved with a UTF-8 BOM (as our downloads are) imports", async () => {
+    vi.useFakeTimers();
+    const t = setup();
+    const userId = await t.run((ctx) => ctx.db.insert("users", {}));
+    const asUser = t.withIdentity({ subject: `${userId}|test-session` });
+    const storageId = await t.run((ctx) =>
+      ctx.storage.store(new Blob([`﻿${toCsv([makeRow(1), makeRow(2)])}`])),
+    );
+
+    const jobId = await asUser.mutation(api.imports.start, {
+      storageId,
+      filename: "fixed-errors.csv",
+    });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    expect(await getJob(t, jobId)).toMatchObject({ status: "completed", processed: 2 });
+  });
+
   test("a CSV without the required columns fails the job", async () => {
     vi.useFakeTimers();
     const t = setup();
