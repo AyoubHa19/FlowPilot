@@ -2,7 +2,16 @@ import { vOnCompleteArgs, Workpool } from "@convex-dev/workpool";
 import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { components, internal } from "./_generated/api";
-import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
+import {
+  action,
+  internalAction,
+  internalMutation,
+  internalQuery,
+  mutation,
+  type MutationCtx,
+  query,
+} from "./_generated/server";
 import { requireUserId } from "./lib/auth";
 import {
   emailFromFilename,
@@ -66,18 +75,45 @@ export const create = mutation({
       await linkDocumentToTenant(ctx, documentId, tenant._id);
     }
 
-    await documentPool.enqueueAction(
-      ctx,
-      internal.documentsNode.process,
-      { documentId },
-      {
-        retry: PROCESS_RETRY,
-        onComplete: internal.documents.processFailed,
-        onCompleteExcludeKinds: ["success"],
-        context: { documentId },
-      },
-    );
+    await enqueueProcessing(ctx, documentId);
     return documentId;
+  },
+});
+
+async function enqueueProcessing(ctx: MutationCtx, documentId: Id<"documents">) {
+  await documentPool.enqueueAction(
+    ctx,
+    internal.documentsNode.process,
+    { documentId },
+    {
+      retry: PROCESS_RETRY,
+      onComplete: internal.documents.processFailed,
+      onCompleteExcludeKinds: ["success"],
+      context: { documentId },
+    },
+  );
+}
+
+/**
+ * Re-processes every document, e.g. after changing the chunker or the
+ * embedding model. Pages through the table so it scales:
+ *
+ *   npx convex run documents:reindex
+ */
+export const reindex = internalMutation({
+  args: { cursor: v.optional(v.union(v.string(), v.null())) },
+  handler: async (ctx, { cursor }) => {
+    const page = await ctx.db
+      .query("documents")
+      .paginate({ numItems: 50, cursor: cursor ?? null });
+    for (const doc of page.page) {
+      await ctx.db.patch(doc._id, { status: "queued", error: undefined });
+      await enqueueProcessing(ctx, doc._id);
+    }
+    if (!page.isDone) {
+      await ctx.scheduler.runAfter(0, internal.documents.reindex, { cursor: page.continueCursor });
+    }
+    return page.page.length;
   },
 });
 
@@ -137,6 +173,13 @@ export const search = action({
     }
     return await searchTenantChunks(ctx, args.tenantId, await embedQuery(question));
   },
+});
+
+/** Same search with a ready-made vector (tests, and callers that embed themselves). */
+export const searchByVector = internalAction({
+  args: { tenantId: v.id("tenants"), vector: v.array(v.float64()), limit: v.optional(v.number()) },
+  handler: async (ctx, { tenantId, vector, limit }) =>
+    await searchTenantChunks(ctx, tenantId, vector, limit),
 });
 
 // --- Background processing (see documentsNode.ts) -------------------------
