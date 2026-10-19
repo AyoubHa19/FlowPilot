@@ -20,7 +20,11 @@ back on in Stage 7.
 - **Stage 2: Bulk import — done.** CSV upload → parse action → 100-row
   batches on the `importPool` Workpool → live counters on `importJobs`.
   10,000 rows import in ~2 min; re-import adds nothing.
-- Next: **Stage 3: Documents and knowledge base.**
+- **Stage 3: Documents and knowledge base — done.** PDF upload → `documentPool`
+  Workpool → Node action (unpdf → chunkText → Gemini `gemini-embedding-2`,
+  768 dims) → `docChunks` with a vector index filtered by `tenantId`.
+  50 PDFs process in ~40s; search is tenant-scoped.
+- Next: **Stage 4: Email in and out (Gmail).**
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
@@ -37,15 +41,17 @@ the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
 ## Folder layout
 
 ```
-convex/             backend: schema, public functions (buildings.ts, tenants.ts, imports.ts)
-  convex.config.ts  components: importPool (Workpool)
+convex/             backend: schema, public functions (buildings, tenants, imports, documents)
+  documentsNode.ts  "use node" PDF processing action (unpdf)
+  convex.config.ts  components: importPool, documentPool (Workpool)
   lib/              auth helper (requireUserId), shared validators
-  model/            plain functions: natural-key upserts, lookups, CSV row schema
+  model/            plain functions: upserts, CSV row schema, chunker,
+                    embeddings (Gemini), tenant-scoped vector search
   seed.ts           internal seed mutation (data in seedData.ts)
   *.test.ts         convex-test unit tests (modules via test.setup.ts)
   _generated/       written by `npx convex dev`, never edit
-scripts/            node scripts (generate-import-csv.mjs → samples/, gitignored)
-src/app/            Next.js routes: /signin, (dashboard)/buildings, /tenants/[id], /imports
+scripts/            node scripts writing test data to samples/ (gitignored)
+src/app/            Next.js routes: /signin, (dashboard)/buildings, /tenants/[id], /imports, /documents
 src/components/     app components; ui/ is shadcn (generated, edit sparingly)
 src/lib/            format.ts (cents → €, ISO dates), download.ts (CSV download)
 src/proxy.ts        Next 16 "proxy" (formerly middleware): optimistic auth redirects
@@ -63,7 +69,16 @@ npm test              # vitest + convex-test
 npm run build
 npx convex run seed:run   # idempotent demo data (dev deployment)
 npm run generate:import-csv -- --rows 10000 --broken 3   # test CSV in samples/
+npm run generate:lease-pdfs -- --count 50               # lease PDFs in samples/leases/
+npx convex run documents:reindex   # re-chunk + re-embed all documents
 ```
+
+Secrets on the Convex dev deployment: `GOOGLE_GENERATIVE_AI_API_KEY` (Gemini),
+plus the Convex Auth keys. Never print their values.
+
+On Windows, edit source files with the editor tool, not `sed -i`: the Next.js
+dev server can miss the replaced file and serve a stale server render
+(hydration mismatch). Restart `npm run dev` if that happens.
 
 ## Rules
 

@@ -79,3 +79,39 @@ One short entry per technical choice, newest last.
   for much larger files.
 - **Downloaded CSVs start with a UTF-8 BOM** so Excel shows umlauts; the
   importer trims header names, which strips it again.
+
+## Stage 3 — Documents and knowledge base
+
+- **`tenantId` is copied onto every chunk.** Convex vector search filters only
+  on fields of the indexed table, so the tenant has to live on the chunk. The
+  filter runs inside the index: a search for tenant A cannot return tenant B's
+  lease, even with an identical vector (tested). This is the PRD privacy rule
+  enforced by the data model, not by prompt instructions.
+- **One Workpool job per PDF on its own `documentPool`** (`maxParallelism: 3`).
+  A separate pool means a 10,000-row import never delays documents, and the
+  low parallelism keeps us inside Gemini's free-tier rate limit. Jobs retry 3
+  times with exponential backoff; unreadable or scanned PDFs throw a
+  `NonRetryableError` so they fail fast with a clear reason.
+- **Processing is idempotent.** A run reclaims any non-ready document and
+  deletes earlier chunks before writing new ones, so a retry or a
+  `documents:reindex` never duplicates chunks.
+- **PDF text in a Node action (`"use node"`)** with unpdf, as the PRD planned;
+  everything else stays in the default runtime.
+- **Chunking by sentences, not characters.** The first version cut at every
+  dot and overlapped by raw characters: "EUR 2,175.00" was split and chunks
+  began mid-sentence, so "notice period" ranked the tail of the section first.
+  The fix: unwrap PDF lines, treat short unpunctuated lines as section
+  headings, split only at a real sentence end, pack whole sentences into
+  800-character chunks and overlap by whole sentences (150 chars). The
+  notice-period section now lands whole in one chunk and ranks first.
+- **`gemini-embedding-2` at 768 dimensions**, with `RETRIEVAL_DOCUMENT` /
+  `RETRIEVAL_QUERY` task types (asymmetric retrieval). 768 instead of 3072
+  cuts storage and index size by 4x for a negligible quality loss at this
+  scale. Model and size are constants in `model/embeddings.ts`; changing them
+  means updating the vector index and running `documents:reindex`.
+- **Link by filename (`lease-<email>.pdf`) or by hand.** The email is the
+  tenant's natural key, so no ids leak into filenames; files that do not match
+  stay "Unlinked" and can be linked from the table.
+- **Sample leases vary per tenant** (rent, dates, pets, parking), so the search
+  test proves it returns *that* tenant's clause: "Can I keep a dog?" returns
+  "may keep one dog and one cat" for Anna and "no dogs or cats" for Felix.
