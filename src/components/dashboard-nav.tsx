@@ -7,8 +7,9 @@ import { TenantSearch } from "@/components/tenant-search";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Inbox and Approvals join this list in later stages.
+// Approvals joins this list in Stage 6.
 const LINKS = [
+  { href: "/inbox", label: "Inbox" },
   { href: "/buildings", label: "Buildings" },
   { href: "/documents", label: "Documents" },
   { href: "/imports", label: "Imports" },
@@ -22,7 +23,7 @@ export function DashboardNav() {
   return (
     <header className="border-b">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3">
-        <Link href="/buildings" className="font-semibold">
+        <Link href="/inbox" className="font-semibold">
           FlowPilot AI
         </Link>
         <nav className="flex items-center gap-4 text-sm">

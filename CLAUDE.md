@@ -76,9 +76,10 @@ npx convex run documents:reindex   # re-chunk + re-embed all documents
 Secrets on the Convex dev deployment: `GOOGLE_GENERATIVE_AI_API_KEY` (Gemini),
 plus the Convex Auth keys. Never print their values.
 
-On Windows, edit source files with the editor tool, not `sed -i`: the Next.js
-dev server can miss the replaced file and serve a stale server render
-(hydration mismatch). Restart `npm run dev` if that happens.
+On this Windows checkout the Next.js dev server sometimes misses edits to
+components rendered by the `(dashboard)` layout (e.g. `dashboard-nav.tsx`) and
+serves a stale server render, which shows up as a hydration mismatch. Restart
+`npm run dev` when that happens; production builds are not affected.
 
 ## Rules
 
