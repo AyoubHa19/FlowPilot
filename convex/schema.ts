@@ -5,6 +5,8 @@ import {
   agentRunStatus,
   agentStepStatus,
   agentStepType,
+  approvalAction,
+  approvalStatus,
   documentKind,
   documentStatus,
   emailCategory,
@@ -75,6 +77,8 @@ export default defineSchema({
     priority: ticketPriority,
     description: v.string(),
     status: ticketStatus,
+    // The agent run that proposed it (Stage 6), when it came from email.
+    agentRunId: v.optional(v.id("agentRuns")),
   })
     .index("by_status", ["status"])
     .index("by_unit_status", ["unitId", "status"]),
@@ -232,6 +236,33 @@ export default defineSchema({
     error: v.optional(v.string()),
     startedAt: v.number(),
   }).index("by_run_index", ["runId", "index"]),
+
+  // Every side effect the agent proposes waits here for a human. Nothing is
+  // sent or created unless its row reaches "approved".
+  approvals: defineTable({
+    runId: v.id("agentRuns"),
+    // The step that proposed it (dedupe key for retried steps)…
+    stepIndex: v.number(),
+    // …and the timeline step that waits for the decision.
+    waitStepIndex: v.optional(v.number()),
+    threadId: v.id("emailThreads"),
+    action: approvalAction,
+    // send_reply: { subject, body }. create_ticket: { category, priority, description }.
+    payload: v.any(),
+    // The manager's edited version; executed instead of payload when set.
+    editedPayload: v.optional(v.any()),
+    status: approvalStatus,
+    decidedAt: v.optional(v.number()),
+    decidedBy: v.optional(v.id("users")),
+    rejectReason: v.optional(v.string()),
+    // What execution produced (gmail message id, ticket id) or why it failed.
+    result: v.optional(v.string()),
+    error: v.optional(v.string()),
+  })
+    .index("by_status", ["status"])
+    .index("by_run", ["runId"])
+    // Recently decided, newest first (pending rows have no decidedAt).
+    .index("by_decided", ["decidedAt"]),
 
   // --- Background jobs -----------------------------------------------------
 

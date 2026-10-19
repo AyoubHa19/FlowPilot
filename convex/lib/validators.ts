@@ -35,6 +35,7 @@ export const gmailAccountStatus = v.union(
 
 export const threadStatus = v.union(
   v.literal("open"),
+  v.literal("awaiting_approval"),
   v.literal("replied"),
   v.literal("needs_human"),
   v.literal("closed"),
@@ -67,14 +68,30 @@ export const urgency = v.union(
 export const agentRunStatus = v.union(
   v.literal("queued"),
   v.literal("running"),
+  // Stage 5 runs ended here; kept so their rows stay valid.
   v.literal("drafted"),
+  v.literal("awaiting_approval"),
+  v.literal("completed"),
+  v.literal("rejected"),
   v.literal("escalated"),
   v.literal("skipped"),
   v.literal("failed"),
 );
 export type AgentRunStatus = Infer<typeof agentRunStatus>;
 
-export const agentStepType = v.union(v.literal("llm"), v.literal("tool"));
+export const agentStepType = v.union(v.literal("llm"), v.literal("tool"), v.literal("approval"));
+
+export const approvalAction = v.union(v.literal("send_reply"), v.literal("create_ticket"));
+export type ApprovalAction = Infer<typeof approvalAction>;
+
+export const approvalStatus = v.union(
+  v.literal("pending"),
+  v.literal("approved"),
+  v.literal("rejected"),
+  v.literal("executed"),
+  v.literal("failed"),
+);
+export type ApprovalStatus = Infer<typeof approvalStatus>;
 export const agentStepStatus = v.union(
   v.literal("running"),
   v.literal("succeeded"),
