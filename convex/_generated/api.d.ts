@@ -12,6 +12,9 @@ import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as model_properties from "../model/properties.js";
+import type * as seed from "../seed.js";
+import type * as seedData from "../seedData.js";
 import type * as users from "../users.js";
 
 import type {
@@ -25,6 +28,9 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/validators": typeof lib_validators;
+  "model/properties": typeof model_properties;
+  seed: typeof seed;
+  seedData: typeof seedData;
   users: typeof users;
 }>;
 
