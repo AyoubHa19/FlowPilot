@@ -2,6 +2,8 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
+  documentKind,
+  documentStatus,
   importJobStatus,
   leaseStatus,
   ticketCategory,
@@ -50,6 +52,8 @@ export default defineSchema({
     rentCents: v.number(),
     noticePeriodDays: v.number(),
     status: leaseStatus,
+    // The signed lease PDF, once uploaded (Stage 3).
+    documentId: v.optional(v.id("documents")),
   })
     .index("by_tenant", ["tenantId"])
     .index("by_unit_status", ["unitId", "status"]),
@@ -65,6 +69,41 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_unit_status", ["unitId", "status"]),
+
+  // --- Knowledge base ------------------------------------------------------
+
+  // Uploaded PDFs. Linked to a tenant by filename (lease-<email>.pdf) or by
+  // hand; text is the extracted text, capped to stay under the 1 MB limit.
+  documents: defineTable({
+    storageId: v.id("_storage"),
+    filename: v.string(),
+    kind: documentKind,
+    status: documentStatus,
+    tenantId: v.optional(v.id("tenants")),
+    leaseId: v.optional(v.id("leases")),
+    text: v.optional(v.string()),
+    pageCount: v.optional(v.number()),
+    chunkCount: v.number(),
+    error: v.optional(v.string()),
+  })
+    .index("by_status", ["status"])
+    .index("by_tenant", ["tenantId"]),
+
+  // tenantId is copied from the document so vector search can filter on it:
+  // the agent may only ever search the sender's own lease.
+  docChunks: defineTable({
+    documentId: v.id("documents"),
+    tenantId: v.optional(v.id("tenants")),
+    chunkIndex: v.number(),
+    text: v.string(),
+    embedding: v.array(v.float64()),
+  })
+    .index("by_document", ["documentId", "chunkIndex"])
+    .vectorIndex("by_embedding", {
+      vectorField: "embedding",
+      dimensions: 768,
+      filterFields: ["tenantId"],
+    }),
 
   // --- Background jobs -----------------------------------------------------
 

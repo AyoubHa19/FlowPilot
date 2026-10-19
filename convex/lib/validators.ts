@@ -16,6 +16,18 @@ export const importJobStatus = v.union(
 );
 export type ImportJobStatus = Infer<typeof importJobStatus>;
 
+export const documentKind = v.union(v.literal("lease"), v.literal("other"));
+export type DocumentKind = Infer<typeof documentKind>;
+
+export const documentStatus = v.union(
+  v.literal("queued"),
+  v.literal("extracting"),
+  v.literal("embedding"),
+  v.literal("ready"),
+  v.literal("failed"),
+);
+export type DocumentStatus = Infer<typeof documentStatus>;
+
 export const ticketCategory = v.union(
   v.literal("plumbing"),
   v.literal("electrical"),
