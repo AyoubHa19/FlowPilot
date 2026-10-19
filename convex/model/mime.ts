@@ -100,7 +100,6 @@ export function extractBodyText(payload: GmailPart) {
 
 /** RFC 2047 encoded-word for non-ASCII header values (subjects with umlauts). */
 export function encodeHeaderValue(value: string) {
-  // eslint-disable-next-line no-control-regex
   if (/^[\x20-\x7e]*$/.test(value)) return value;
   return `=?UTF-8?B?${utf8ToBase64(value)}?=`;
 }
