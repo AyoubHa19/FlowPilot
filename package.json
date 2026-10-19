@@ -19,6 +19,7 @@
     "@auth/core": "^0.41.3",
     "@base-ui/react": "^1.9.0",
     "@convex-dev/auth": "^0.0.96",
+    "@convex-dev/workflow": "^0.4.10",
     "@convex-dev/workpool": "^0.4.14",
     "ai": "^7.0.144",
     "class-variance-authority": "^0.7.1",

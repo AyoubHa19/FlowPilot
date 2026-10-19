@@ -36,6 +36,7 @@ export const gmailAccountStatus = v.union(
 export const threadStatus = v.union(
   v.literal("open"),
   v.literal("replied"),
+  v.literal("needs_human"),
   v.literal("closed"),
 );
 export type ThreadStatus = Infer<typeof threadStatus>;
@@ -43,6 +44,42 @@ export type ThreadStatus = Infer<typeof threadStatus>;
 export const messageDirection = v.union(v.literal("inbound"), v.literal("outbound"));
 
 export const sendStatus = v.union(v.literal("sending"), v.literal("sent"), v.literal("failed"));
+
+// --- Agent -----------------------------------------------------------------
+
+export const emailCategory = v.union(
+  v.literal("repair"),
+  v.literal("payment"),
+  v.literal("lease_question"),
+  v.literal("move_in_out"),
+  v.literal("complaint"),
+  v.literal("other"),
+);
+export type EmailCategory = Infer<typeof emailCategory>;
+
+export const urgency = v.union(
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("urgent"),
+);
+
+export const agentRunStatus = v.union(
+  v.literal("queued"),
+  v.literal("running"),
+  v.literal("drafted"),
+  v.literal("escalated"),
+  v.literal("skipped"),
+  v.literal("failed"),
+);
+export type AgentRunStatus = Infer<typeof agentRunStatus>;
+
+export const agentStepType = v.union(v.literal("llm"), v.literal("tool"));
+export const agentStepStatus = v.union(
+  v.literal("running"),
+  v.literal("succeeded"),
+  v.literal("failed"),
+);
 
 export const ticketCategory = v.union(
   v.literal("plumbing"),

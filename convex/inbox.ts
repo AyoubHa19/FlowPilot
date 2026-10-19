@@ -48,10 +48,18 @@ export const getThread = query({
 
 /**
  * Demo fallback: an inbound email that never touched Gmail. It goes through
- * the same ingest path (dedupe, threading, tenant linking) as a real one.
+ * the same ingest path (dedupe, threading, tenant linking, agent run) as a
+ * real one. `forceToolFailure` makes the lease search fail once, to show the
+ * workflow retrying a step.
  */
 export const simulateEmail = mutation({
-  args: { fromEmail: v.string(), fromName: v.optional(v.string()), subject: v.string(), body: v.string() },
+  args: {
+    fromEmail: v.string(),
+    fromName: v.optional(v.string()),
+    subject: v.string(),
+    body: v.string(),
+    forceToolFailure: v.optional(v.boolean()),
+  },
   handler: async (ctx, args) => {
     await requireUserId(ctx);
     const email = normalizeEmail(args.fromEmail);
@@ -76,6 +84,7 @@ export const simulateEmail = mutation({
       rfcMessageId: `<sim-${id}@flowpilot.demo>`,
       receivedAt: Date.now(),
       simulated: true,
+      failToolOnce: args.forceToolFailure ? "search_lease_documents" : undefined,
     });
     return threadId;
   },

@@ -1,5 +1,6 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { startAgentRun } from "./agentRuns";
 import { parseAddress, snippetOf } from "./mime";
 import { findTenantByEmail } from "./properties";
 
@@ -15,6 +16,10 @@ export type IncomingMessage = {
   references?: string;
   receivedAt: number;
   simulated: boolean;
+  /** Set for newsletters and notifications: the agent skips them. */
+  automatedReason?: string;
+  /** Dev-only fault injection, passed to the agent run. */
+  failToolOnce?: string;
 };
 
 /**
@@ -78,5 +83,16 @@ export async function ingestMessage(
     references: msg.references,
     receivedAt: msg.receivedAt,
   });
+
+  // PRD: a new inbound message starts a durable agent run.
+  if (msg.direction === "inbound") {
+    await startAgentRun(ctx, {
+      messageId,
+      threadId: thread._id,
+      tenantId: tenant?._id,
+      skipReason: msg.automatedReason,
+      failToolOnce: msg.failToolOnce,
+    });
+  }
   return { messageId, threadId: thread._id, created: true };
 }

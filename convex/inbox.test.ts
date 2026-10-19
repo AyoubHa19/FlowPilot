@@ -5,6 +5,13 @@ import schema from "./schema";
 import { tenantFor } from "./seedData";
 import { modules } from "./test.setup";
 
+// Ingest starts an agent run; that is covered in agent.test.ts. Here the
+// agent is stubbed so these tests stay about inbox behaviour.
+vi.mock("./model/agentRuns", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./model/agentRuns")>()),
+  startAgentRun: vi.fn(),
+}));
+
 let t: ReturnType<typeof convexTest>;
 let asUser: ReturnType<ReturnType<typeof convexTest>["withIdentity"]>;
 

@@ -24,6 +24,7 @@ import {
   refreshAccessToken,
   sendRaw,
 } from "./model/gmailApi";
+import { automatedReason } from "./model/agentRuns";
 import { ingestMessage } from "./model/inbox";
 import { buildReplyMime, bytesToBase64Url, extractBodyText, header, parseAddress } from "./model/mime";
 
@@ -193,6 +194,7 @@ export const ingest = internalMutation({
     rfcMessageId: v.optional(v.string()),
     references: v.optional(v.string()),
     receivedAt: v.number(),
+    automatedReason: v.optional(v.string()),
   },
   handler: async (ctx, msg) => (await ingestMessage(ctx, { ...msg, simulated: false })).created,
 });
@@ -200,9 +202,18 @@ export const ingest = internalMutation({
 function toIncoming(message: GmailMessage, accountEmail: string) {
   const headers = message.payload.headers;
   const from = header(headers, "From") ?? "";
-  const sentByUs =
-    parseAddress(from).email === accountEmail || (message.labelIds ?? []).includes("SENT");
+  const fromEmail = parseAddress(from).email;
+  const sentByUs = fromEmail === accountEmail || (message.labelIds ?? []).includes("SENT");
   return {
+    automatedReason: automatedReason({
+      fromEmail,
+      labelIds: message.labelIds,
+      headers: {
+        "list-unsubscribe": header(headers, "List-Unsubscribe"),
+        precedence: header(headers, "Precedence"),
+        "auto-submitted": header(headers, "Auto-Submitted"),
+      },
+    }),
     gmailMessageId: message.id,
     gmailThreadId: message.threadId,
     direction: sentByUs ? ("outbound" as const) : ("inbound" as const),

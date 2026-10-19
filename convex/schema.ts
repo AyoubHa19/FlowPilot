@@ -2,8 +2,12 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
+  agentRunStatus,
+  agentStepStatus,
+  agentStepType,
   documentKind,
   documentStatus,
+  emailCategory,
   gmailAccountStatus,
   importJobStatus,
   leaseStatus,
@@ -13,6 +17,7 @@ import {
   ticketCategory,
   ticketPriority,
   ticketStatus,
+  urgency,
 } from "./lib/validators";
 
 export default defineSchema({
@@ -174,6 +179,59 @@ export default defineSchema({
   })
     .index("by_thread", ["threadId", "receivedAt"])
     .index("by_gmail_message", ["gmailMessageId"]),
+
+  // --- Agent runs ----------------------------------------------------------
+
+  // One run per inbound message. Totals (tokens, cost) are kept on the run so
+  // the dashboard reads one row; the details live in agentSteps.
+  agentRuns: defineTable({
+    messageId: v.id("emailMessages"),
+    threadId: v.id("emailThreads"),
+    tenantId: v.optional(v.id("tenants")),
+    status: agentRunStatus,
+    category: v.optional(emailCategory),
+    urgency: v.optional(urgency),
+    language: v.optional(v.string()),
+    summary: v.optional(v.string()),
+    draft: v.optional(v.object({ subject: v.string(), body: v.string() })),
+    escalationReason: v.optional(v.string()),
+    skipReason: v.optional(v.string()),
+    toolCalls: v.number(),
+    tokensIn: v.number(),
+    tokensOut: v.number(),
+    costUsd: v.number(),
+    model: v.string(),
+    promptVersion: v.string(),
+    // Dev-only fault injection: this tool fails on its first attempt.
+    failToolOnce: v.optional(v.string()),
+    workflowId: v.optional(v.string()),
+    startedAt: v.number(),
+    finishedAt: v.optional(v.number()),
+    error: v.optional(v.string()),
+  })
+    .index("by_status", ["status"])
+    .index("by_message", ["messageId"])
+    .index("by_thread", ["threadId"]),
+
+  // Every LLM call and tool call. A retry updates the same row (attempt + 1),
+  // so the timeline is one small indexed query that updates live.
+  agentSteps: defineTable({
+    runId: v.id("agentRuns"),
+    index: v.number(),
+    type: agentStepType,
+    name: v.string(),
+    toolName: v.optional(v.string()),
+    input: v.string(),
+    output: v.optional(v.string()),
+    status: agentStepStatus,
+    attempt: v.number(),
+    durationMs: v.optional(v.number()),
+    tokensIn: v.optional(v.number()),
+    tokensOut: v.optional(v.number()),
+    costUsd: v.optional(v.number()),
+    error: v.optional(v.string()),
+    startedAt: v.number(),
+  }).index("by_run_index", ["runId", "index"]),
 
   // --- Background jobs -----------------------------------------------------
 
