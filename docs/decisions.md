@@ -20,3 +20,27 @@ One short entry per technical choice, newest last.
 - **Convex prod is deployed by the Vercel build** (`vercel.json`:
   `npx convex deploy --cmd 'npm run build'`), so frontend and backend always
   ship together from the same commit. Vercel only holds `CONVEX_DEPLOY_KEY`.
+
+## Stage 1 — Property data
+
+- **Upserts by natural key** (building name, building + unit label, tenant
+  email, tenant + unit + lease start, unit + ticket description) live in
+  `convex/model/properties.ts`. The seed uses them now and the CSV import will
+  in Stage 2, so running either twice never creates duplicates.
+- **No `by_building` index on units.** `by_building_label` starts with
+  `buildingId`, so a prefix query on it already lists a building's units.
+  Same for tickets: `by_unit_status` replaces `by_unit` and also answers
+  "open tickets for this unit", which the agent needs in Stage 5. Each extra
+  index costs a write on every insert and patch.
+- **Rent in integer cents, dates as ISO strings.** No floating-point money
+  errors; ISO dates sort correctly as strings and carry no timezone.
+- **Emails are normalised to lowercase on write and on lookup**, so
+  `Felix.Braun@…` and `felix.braun@…` are the same tenant, with one index read.
+- **Deterministic seed data written by hand, no faker.** Same output every
+  run (the idempotency test depends on it) and nothing large in the Convex
+  bundle.
+- **Ids from the URL are validated with `normalizeId`.** A bad link shows
+  "not found" instead of throwing a validator error.
+- **Dashboard pages are client components on Convex subscriptions**
+  (`useQuery`, `usePaginatedQuery`): data updates live and every list is
+  paginated from the start.

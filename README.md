@@ -8,7 +8,7 @@ Built with Next.js, Convex, Convex Auth, shadcn/ui and Gemini.
 
 > Live demo: https://flow-pilot-rose.vercel.app
 >
-> Status: Stage 0 (setup) done. Architecture, schema, decisions and eval results
+> Status: Stage 1 (property data) done. Architecture, schema, decisions and eval results
 > will be documented here as the stages land.
 
 ## Run locally
