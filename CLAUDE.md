@@ -8,10 +8,13 @@ anything is sent. Full spec: `FlowPilot AI — PRD.pdf`.
 
 ## Current stage
 
-Live at https://flow-pilot-rose.vercel.app (Vercel) with Convex prod
-`amicable-raccoon-556`.
+**Local only until Stage 7.** Build and test against the Convex dev deployment
+(`next-iguana-657`) and `npm run dev`. Do not deploy to Vercel or Convex prod,
+and do not seed prod. Vercel auto-deploys are off in `vercel.json`; turn them
+back on in Stage 7.
 
-- Stage 0: Setup — done.
+- Stage 0: Setup — done (an early Stage 0 build is still on Vercel and
+  Convex prod `amicable-raccoon-556`; both are stale).
 - **Stage 1: Property data — done.** Schema, idempotent seed, buildings /
   building detail / tenant detail pages, tenant lookup by email.
 - Next: **Stage 2: Bulk import.** Reuse the upserts in `convex/model/properties.ts`.

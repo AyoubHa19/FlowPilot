@@ -41,6 +41,10 @@ One short entry per technical choice, newest last.
   bundle.
 - **Ids from the URL are validated with `normalizeId`.** A bad link shows
   "not found" instead of throwing a validator error.
+- **Develop locally, deploy once in Stage 7.** Vercel builds kept failing and
+  each retry cost time without moving a stage forward, so auto-deploys are off
+  (`git.deploymentEnabled: false`) and every stage is built and tested against
+  the Convex dev deployment. The production deploy is part of Stage 7.
 - **Dashboard pages are client components on Convex subscriptions**
   (`useQuery`, `usePaginatedQuery`): data updates live and every list is
   paginated from the start.

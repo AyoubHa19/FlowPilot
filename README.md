@@ -6,10 +6,9 @@ to approve before anything is sent.
 
 Built with Next.js, Convex, Convex Auth, shadcn/ui and Gemini.
 
-> Live demo: https://flow-pilot-rose.vercel.app
->
-> Status: Stage 1 (property data) done. Architecture, schema, decisions and eval results
-> will be documented here as the stages land.
+> Status: Stage 1 (property data) done. Development runs locally; the live
+> demo is deployed in Stage 7. Architecture, schema, decisions and eval
+> results will be documented here as the stages land.
 
 ## Run locally
 
@@ -24,9 +23,10 @@ see the [Convex Auth manual setup](https://labs.convex.dev/auth/setup/manual).
 
 See [docs/decisions.md](docs/decisions.md) for the reasoning behind each choice.
 
-## Deploy
+## Deploy (Stage 7)
 
-Vercel builds with `npx convex deploy --cmd 'npm run build'` (see `vercel.json`):
+Auto-deploys from GitHub are off (`git.deploymentEnabled: false` in
+`vercel.json`) until Stage 7. Then remove that flag. Vercel builds with `npx convex deploy --cmd 'npm run build'` (see `vercel.json`):
 each production build pushes the Convex functions to the production deployment
 and injects `NEXT_PUBLIC_CONVEX_URL`. Vercel needs one env var,
 `CONVEX_DEPLOY_KEY` (a production deploy key from the Convex dashboard).
