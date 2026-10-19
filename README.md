@@ -6,7 +6,7 @@ to approve before anything is sent.
 
 Built with Next.js, Convex, Convex Auth, shadcn/ui and Gemini.
 
-> Status: Stage 4 (email in and out) done. Development runs locally; the live
+> Status: Stage 5 (agent engine) done. Development runs locally; the live
 > demo is deployed in Stage 7. Architecture, schema, decisions and eval
 > results will be documented here as the stages land.
 

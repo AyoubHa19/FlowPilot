@@ -151,3 +151,47 @@ One short entry per technical choice, newest last.
   would send it twice. Failures stay visible on the message.
 - **Simulated threads share the real pipeline** (same ingest, threading and
   tenant linking) but never call Gmail, so demos work even when OAuth expired.
+
+## Stage 5 — Agent engine
+
+- **Convex Workflow, one step per LLM call and per tool call.** Each step's
+  result is journaled, so a retry (or a server restart) re-runs only the step
+  that failed. A forced failure of `search_lease_documents` shows as
+  "retried ×1" and the run still finishes (tested, and checked live).
+- **The model proposes, the workflow executes.** `generateText` runs with tool
+  definitions but no `execute`: it returns tool calls, and the workflow runs
+  each one as its own retryable step. Retries live in the workflow
+  (`maxRetries: 0` on the SDK), so every retry is visible in the timeline
+  instead of hidden inside the SDK.
+- **Context first, without the LLM.** After classification, the workflow looks
+  up tenant, lease, open tickets and lease passages with the same tools, and
+  hands them to the model in the first prompt. Most emails then need a single
+  model turn (one `draft_reply` call), which keeps runs at ~$0.002.
+- **Privacy is enforced in the tools, not the prompt.** No tool accepts a
+  tenant id. Every lookup is bound to the email's sender (`RunScope`):
+  `find_tenant_by_email` refuses any other address, and lease search is
+  filtered by the sender's tenant inside the vector index. An unknown sender
+  gets nothing (tested with a model that actively asks for another tenant).
+- **zod on every tool input, errors back to the model.** Invalid input is
+  returned as a tool error the model can correct, not thrown.
+- **Guardrails:** at most 8 tool calls and a 40k-token cap per run; either
+  escalates the conversation to a person (`needs_human`).
+- **Two models.** Classification uses `gemini-3.5-flash-lite` (cheap, fast,
+  structured output); the agent uses `gemini-3.8-flash` with low thinking.
+  During testing 3.8 Flash returned "high demand" errors and calls of 40–75s,
+  which broke the "under a minute" goal. Each call now has a 20s timeout, and a
+  retried agent step uses the Flash-Lite fallback: the run finished in 32s with
+  attempt 1 cut off and the fallback answering in 2s. The step records which
+  model answered.
+- **Cost is logged at paid list prices** (constants in `model/llm.ts`, source
+  and date in the comment) even on the free tier, so cost per run is real.
+- **Automated mail never reaches the LLM.** Newsletters and notifications
+  (no-reply senders, Gmail Promotions/Social/Updates, `List-Unsubscribe`,
+  `Precedence: bulk`) are recorded as skipped runs.
+- **Prompts are versioned TypeScript files** (`convex/prompts/`). Each run
+  stores `promptVersion` and `model`. v2 added "mention an open ticket that
+  already covers the problem" after a draft ignored one; v3 localized the
+  sign-off after a German draft ended in English.
+- **Tests drive the real workflow with a scripted mock model**
+  (`MockLanguageModelV4`), so retries, fallback, tool limits, the token cap and
+  the privacy rules are tested without calling Gemini.

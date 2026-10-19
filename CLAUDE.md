@@ -29,7 +29,13 @@ back on in Stage 7.
   mode), encrypted tokens, minute cron sync on the history API, dedupe by
   gmailMessageId, tenant linking, replies in the same Gmail thread, and a
   simulate-email form for demos.
-- Next: **Stage 5: Agent engine.**
+- **Stage 5: Agent engine — done.** Every new inbound email starts a durable
+  Workflow run: classify (`gemini-3.5-flash-lite`) → context lookups → tool loop
+  (`gemini-3.8-flash`, max 8 tool calls, fallback model on retry) → draft.
+  Steps, tokens and cost logged in `agentRuns` / `agentSteps`. ~$0.002 and
+  ~30s per run. Prompts in `convex/prompts/` (current: agent-v3).
+- Next: **Stage 6: Approvals and run timeline** (create_ticket and send_reply
+  as approval-gated tools; workflow pauses on an event until a human decides).
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
@@ -47,15 +53,18 @@ the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
 
 ```
 convex/             backend: schema, public functions (buildings, tenants, imports,
-                    documents, inbox, gmail)
+                    documents, inbox, gmail, agent)
+  agent.ts          agent workflow (runAgent), steps, run logging
+  prompts/          versioned prompts (classify.ts, agent.ts with PROMPT_VERSION)
   documentsNode.ts  "use node" PDF processing action (unpdf)
   http.ts           Convex Auth routes + /gmail/oauth/callback
   crons.ts          gmail inbox sync, every minute
-  convex.config.ts  components: importPool, documentPool (Workpool)
-  lib/              auth helper (requireUserId), validators, crypto (AES-GCM tokens)
+  convex.config.ts  components: importPool, documentPool (Workpool), workflow
+  lib/              auth, validators, crypto (AES-GCM tokens), workflow manager
   model/            plain functions: upserts, CSV row schema, chunker,
-                    embeddings (Gemini), vector search, Gmail REST client,
-                    MIME parse/build, inbox ingest
+                    embeddings, vector search, Gmail client, MIME, inbox
+                    ingest, llm (models, prices), agentTools (tool registry),
+                    agentRuns (start run, automated-mail filter)
   seed.ts           internal seed mutation (data in seedData.ts)
   *.test.ts         convex-test unit tests (modules via test.setup.ts)
   _generated/       written by `npx convex dev`, never edit
@@ -110,4 +119,10 @@ serves a stale server render, which shows up as a hydration mismatch. Restart
 - Secrets only in Convex environment variables (`npx convex env set`), never in
   code or committed files.
 - Never render email HTML raw.
+- Agent tools never take a tenant id from the model; they are bound to the
+  run's sender (`RunScope`). New tools go in `model/agentTools.ts` with a zod
+  schema and a `requiresApproval` flag.
+- Changing a prompt: bump `PROMPT_VERSION` in `convex/prompts/agent.ts`.
+- Agent tests mock the model with `MockLanguageModelV4` via `vi.mock("./model/llm")`
+  (see `convex/agent.test.ts`); never call Gemini from tests.
 - Small commits, one per feature.
