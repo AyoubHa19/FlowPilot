@@ -13,7 +13,7 @@ import {
   type QueryCtx,
 } from "./_generated/server";
 import { deliverMessage } from "./gmail";
-import { requireUserId } from "./lib/auth";
+import { requireOwner, requireUserId } from "./lib/auth";
 import { workflow } from "./lib/workflow";
 import {
   approvalEvent,
@@ -42,7 +42,13 @@ async function withContext(ctx: QueryCtx, approval: Doc<"approvals">) {
       counterpartName: thread.counterpartName,
       simulated: thread.simulated,
     },
-    run: run && { _id: run._id, category: run.category, urgency: run.urgency, summary: run.summary },
+    run: run && {
+      _id: run._id,
+      category: run.category,
+      urgency: run.urgency,
+      summary: run.summary,
+      escalationReason: run.escalationReason,
+    },
     tenant: tenant && { _id: tenant._id, name: tenant.name },
   };
 }
@@ -114,6 +120,9 @@ async function decide(
   if (approval.status !== "pending") {
     throw new ConvexError("This action was already decided");
   }
+  // Decisions on real email (sending, creating tickets for it) are owner-only.
+  const thread = await ctx.db.get(approval.threadId);
+  if (!thread?.simulated) await requireOwner(ctx);
   await ctx.db.patch(approvalId, { ...decision, decidedAt: Date.now(), decidedBy: userId });
 
   // Wake the run's workflow, which is waiting on this event.
@@ -181,9 +190,14 @@ export const collectForRun = internalMutation({
   args: { runId: v.id("agentRuns"), stepIndex: v.number() },
   handler: async (ctx, { runId, stepIndex }) => {
     const run = (await ctx.db.get(runId))!;
-    if (run.draft && !run.escalationReason) {
+    await ctx.db.patch(runId, { draftedAt: Date.now() });
+    // A draft always becomes a proposal. With an escalation it is a safety
+    // emergency: the person already alerted can send it in one click.
+    if (run.draft) {
       await proposeAction(ctx, { runId, stepIndex, action: "send_reply", payload: run.draft });
     }
+    // Eval runs end here: proposals are recorded with status "eval".
+    if (run.mode === "eval") return [];
     const approvals = await ctx.db
       .query("approvals")
       .withIndex("by_run", (q) => q.eq("runId", runId))
@@ -193,7 +207,10 @@ export const collectForRun = internalMutation({
       .sort((a, b) => (a.action === b.action ? a.stepIndex - b.stepIndex : a.action === "create_ticket" ? -1 : 1));
     if (pending.length > 0) {
       await ctx.db.patch(runId, { status: "awaiting_approval" });
-      await ctx.db.patch(run.threadId, { status: "awaiting_approval" });
+      // "Needs a person" outranks "awaiting approval" in the inbox.
+      if (!run.escalationReason) {
+        await ctx.db.patch(run.threadId, { status: "awaiting_approval" });
+      }
     }
     return pending.map((a) => ({ approvalId: a._id, action: a.action }));
   },

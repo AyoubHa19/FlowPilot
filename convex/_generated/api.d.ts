@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
 import type * as agent from "../agent.js";
 import type * as approvals from "../approvals.js";
 import type * as auth from "../auth.js";
@@ -15,6 +16,7 @@ import type * as buildings from "../buildings.js";
 import type * as crons from "../crons.js";
 import type * as documents from "../documents.js";
 import type * as documentsNode from "../documentsNode.js";
+import type * as evals from "../evals.js";
 import type * as gmail from "../gmail.js";
 import type * as http from "../http.js";
 import type * as imports from "../imports.js";
@@ -49,6 +51,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
   agent: typeof agent;
   approvals: typeof approvals;
   auth: typeof auth;
@@ -56,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   documents: typeof documents;
   documentsNode: typeof documentsNode;
+  evals: typeof evals;
   gmail: typeof gmail;
   http: typeof http;
   imports: typeof imports;

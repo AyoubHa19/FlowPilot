@@ -156,9 +156,13 @@ export default defineSchema({
     counterpartName: v.optional(v.string()),
     snippet: v.string(),
     simulated: v.boolean(),
+    // Eval-set conversations (Stage 7): kept out of the inbox.
+    eval: v.optional(v.boolean()),
   })
     .index("by_gmail_thread", ["gmailThreadId"])
     .index("by_last_message", ["lastMessageAt"])
+    // The inbox reads eval === undefined, newest first.
+    .index("by_eval_last_message", ["eval", "lastMessageAt"])
     .index("by_tenant", ["tenantId", "lastMessageAt"]),
 
   // Plain text only: email HTML is converted to text on ingest and never
@@ -209,13 +213,22 @@ export default defineSchema({
     // Dev-only fault injection: this tool fails on its first attempt.
     failToolOnce: v.optional(v.string()),
     workflowId: v.optional(v.string()),
+    // Eval runs (Stage 7): scored, never proposed for approval.
+    mode: v.optional(v.literal("eval")),
+    evalBatchId: v.optional(v.string()),
+    evalCaseId: v.optional(v.string()),
     startedAt: v.number(),
+    // When the draft (or the escalation) was ready for a person.
+    draftedAt: v.optional(v.number()),
     finishedAt: v.optional(v.number()),
     error: v.optional(v.string()),
   })
     .index("by_status", ["status"])
     .index("by_message", ["messageId"])
-    .index("by_thread", ["threadId"]),
+    .index("by_thread", ["threadId"])
+    // Dashboard: production runs (mode undefined), newest first.
+    .index("by_mode_started", ["mode", "startedAt"])
+    .index("by_eval_batch", ["evalBatchId"]),
 
   // Every LLM call and tool call. A retry updates the same row (attempt + 1),
   // so the timeline is one small indexed query that updates live.

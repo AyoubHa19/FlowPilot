@@ -1,15 +1,17 @@
 import { vResultValidator, vWorkflowId } from "@convex-dev/workflow";
 import { generateText, type JSONValue, type ModelMessage, Output, type ToolResultPart } from "ai";
-import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
+import { ConvexError, v } from "convex/values";
 import { z } from "zod";
 import { internal } from "./_generated/api";
 import {
   internalAction,
   internalMutation,
   internalQuery,
+  mutation,
   query,
 } from "./_generated/server";
-import { requireUserId } from "./lib/auth";
+import { requireOwner, requireUserId } from "./lib/auth";
 import { agentStepStatus, agentStepType, emailCategory, urgency } from "./lib/validators";
 import { STEP_RETRY, workflow } from "./lib/workflow";
 import { executeTool, type RunScope, toolSetForModel } from "./model/agentTools";
@@ -461,9 +463,10 @@ export const finishRun = internalMutation({
       .withIndex("by_run", (q) => q.eq("runId", runId))
       .collect();
     const reply = approvals.find((a) => a.action === "send_reply");
-    let status: "escalated" | "completed" | "rejected" | "failed";
+    let status: "escalated" | "completed" | "rejected" | "failed" | "evaluated";
     let error: string | undefined;
     if (run.escalationReason) status = "escalated";
+    else if (run.mode === "eval" && run.draft) status = "evaluated";
     else if (reply?.status === "executed") status = "completed";
     else if (reply?.status === "rejected") status = "rejected";
     else {
@@ -542,6 +545,133 @@ export const openTickets = internalQuery({
 });
 
 // --- Dashboard -------------------------------------------------------------
+
+const STATS_WINDOW = 200;
+
+/** Production runs (not evals), newest first, for the runs table. */
+export const listRuns = query({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { paginationOpts }) => {
+    await requireUserId(ctx);
+    const result = await ctx.db
+      .query("agentRuns")
+      .withIndex("by_mode_started", (q) => q.eq("mode", undefined))
+      .order("desc")
+      .paginate(paginationOpts);
+    const page = await Promise.all(
+      result.page.map(async (run) => {
+        const [thread, message, tenant] = await Promise.all([
+          ctx.db.get(run.threadId),
+          ctx.db.get(run.messageId),
+          run.tenantId ? ctx.db.get(run.tenantId) : null,
+        ]);
+        return {
+          _id: run._id,
+          status: run.status,
+          category: run.category,
+          urgency: run.urgency,
+          escalationReason: run.escalationReason,
+          tokensIn: run.tokensIn,
+          tokensOut: run.tokensOut,
+          costUsd: run.costUsd,
+          startedAt: run.startedAt,
+          subject: thread?.subject ?? null,
+          from: message?.from ?? null,
+          tenantName: tenant?.name ?? null,
+        };
+      }),
+    );
+    return { ...result, page };
+  },
+});
+
+/**
+ * Headline numbers over the last 200 production runs and decisions: cost per
+ * run, time to draft, escalations and how often drafts are approved as is.
+ */
+export const runStats = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireUserId(ctx);
+    const runs = await ctx.db
+      .query("agentRuns")
+      .withIndex("by_mode_started", (q) => q.eq("mode", undefined))
+      .order("desc")
+      .take(STATS_WINDOW);
+    const worked = runs.filter((r) => r.status !== "skipped" && r.status !== "queued");
+    const drafted = worked.filter((r) => r.draftedAt !== undefined);
+    const byStatus: Record<string, number> = {};
+    for (const r of runs) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
+    const totalCostUsd = worked.reduce((sum, r) => sum + r.costUsd, 0);
+
+    const decisions = await ctx.db
+      .query("approvals")
+      .withIndex("by_decided", (q) => q.gt("decidedAt", 0))
+      .order("desc")
+      .take(STATS_WINDOW);
+    const replies = decisions.filter((a) => a.action === "send_reply");
+    const rejected = replies.filter((a) => a.status === "rejected").length;
+    const edited = replies.filter((a) => a.status !== "rejected" && a.editedPayload !== undefined).length;
+
+    return {
+      window: STATS_WINDOW,
+      runs: runs.length,
+      byStatus,
+      totalCostUsd,
+      avgCostUsd: worked.length ? totalCostUsd / worked.length : 0,
+      avgDraftMs: drafted.length
+        ? drafted.reduce((sum, r) => sum + (r.draftedAt! - r.startedAt), 0) / drafted.length
+        : null,
+      approvals: {
+        decided: replies.length,
+        approved: replies.length - rejected - edited,
+        edited,
+        rejected,
+      },
+    };
+  },
+});
+
+/**
+ * Starts a failed run again from the beginning (e.g. after a Gemini outage).
+ * Its old steps are cleared; nothing was sent, since sending needs an
+ * approval and a failed run has none pending.
+ */
+export const retryRun = mutation({
+  args: { runId: v.id("agentRuns") },
+  handler: async (ctx, { runId }) => {
+    await requireOwner(ctx);
+    const run = await ctx.db.get(runId);
+    if (run === null) throw new ConvexError("Run not found");
+    if (run.status !== "failed") throw new ConvexError("Only failed runs can be retried");
+    const steps = await ctx.db
+      .query("agentSteps")
+      .withIndex("by_run_index", (q) => q.eq("runId", runId))
+      .collect();
+    for (const step of steps) await ctx.db.delete(step._id);
+    await ctx.db.patch(runId, {
+      status: "queued",
+      error: undefined,
+      escalationReason: undefined,
+      draft: undefined,
+      draftedAt: undefined,
+      finishedAt: undefined,
+      toolCalls: 0,
+      tokensIn: 0,
+      tokensOut: 0,
+      costUsd: 0,
+      failToolOnce: undefined,
+      startedAt: Date.now(),
+    });
+    const workflowId = await workflow.start(
+      ctx,
+      internal.agent.runAgent,
+      { runId },
+      { onComplete: internal.agent.workflowDone, context: { runId } },
+    );
+    await ctx.db.patch(runId, { workflowId });
+  },
+});
 
 /** Everything the live run timeline page shows, in one subscription. */
 export const runTimeline = query({

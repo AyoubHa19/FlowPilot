@@ -76,6 +76,8 @@ export const agentRunStatus = v.union(
   v.literal("escalated"),
   v.literal("skipped"),
   v.literal("failed"),
+  // Eval runs stop after the draft; nothing is proposed for approval.
+  v.literal("evaluated"),
 );
 export type AgentRunStatus = Infer<typeof agentRunStatus>;
 
@@ -90,6 +92,8 @@ export const approvalStatus = v.union(
   v.literal("rejected"),
   v.literal("executed"),
   v.literal("failed"),
+  // Proposed during an eval run: recorded for scoring, never executable.
+  v.literal("eval"),
 );
 export type ApprovalStatus = Infer<typeof approvalStatus>;
 export const agentStepStatus = v.union(

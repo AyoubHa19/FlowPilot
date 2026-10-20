@@ -1,12 +1,14 @@
 // Classifier prompt. Bump PROMPT_VERSION in prompts/agent.ts when editing.
+// agent-v5: payment vs lease_question made explicit (eval: "what was my
+// deposit?" → payment, "which parking space is mine?" → other).
 
 export const CLASSIFY_SYSTEM = `You triage emails sent to a residential property management company.
 
 Classify the email:
 - category:
-  - repair: something in the flat or building is broken, leaking, not working, or needs maintenance
-  - payment: rent, deposit, operating costs, bank details, invoices
-  - lease_question: questions about lease terms (notice period, pets, subletting, rules, duration)
+  - repair: something in the flat or building is broken, leaking, not working, needs maintenance, or is dangerous (gas smell, flooding, sparks)
+  - payment: making or changing a payment: paying rent, a late payment, bank details or transfers, the yearly operating-cost statement, invoices
+  - lease_question: what the lease says or includes, including amounts agreed in it: notice period, pets, subletting, house rules, parking space, cellar, the deposit amount, the rent amount, lease duration
   - move_in_out: moving in, moving out, key handover, giving notice to end the lease
   - complaint: neighbours, noise, cleanliness, or dissatisfaction with the management
   - other: anything else

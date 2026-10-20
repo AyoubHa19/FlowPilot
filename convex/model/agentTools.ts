@@ -131,13 +131,33 @@ export const TOOLS = [
   define({
     name: "escalate_to_human",
     description:
-      "Flag the conversation for a person instead of drafting a reply. Give a short reason.",
+      "Hand the conversation to a person instead of drafting a reply: legal threats, disputes about money or the lease, or when you are unsure. Give a short reason. Not for safety emergencies (use flag_emergency).",
     inputSchema: z.object({ reason: z.string().trim().min(3).max(500) }),
     requiresApproval: false,
     terminal: true,
     handler: async (ctx, scope, { reason }): Promise<unknown> => {
       await ctx.runMutation(internal.agent.escalate, { runId: scope.runId, reason });
       return { escalated: true };
+    },
+  }),
+  define({
+    name: "flag_emergency",
+    description:
+      "A danger to people or the building right now: gas smell, flooding or a burst pipe, fire or smoke, electrical danger (sparks, burning smell), a carbon monoxide alarm, a break-in. Alerts a person immediately. Then call draft_reply with immediate safety instructions and the 24-hour hotline.",
+    inputSchema: z.object({
+      kind: z.enum(["gas", "water", "fire", "electrical", "carbon_monoxide", "security", "other"]),
+      reason: z.string().trim().min(3).max(500),
+    }),
+    requiresApproval: false,
+    handler: async (ctx, scope, { kind, reason }): Promise<unknown> => {
+      await ctx.runMutation(internal.agent.escalate, {
+        runId: scope.runId,
+        reason: `Safety emergency (${kind.replace("_", " ")}): ${reason}`,
+      });
+      return {
+        flagged: true,
+        next: "A person has been alerted. Now call draft_reply with the immediate safety steps and the 24-hour hotline. Do not propose a ticket: the person handles the emergency.",
+      };
     },
   }),
 ];

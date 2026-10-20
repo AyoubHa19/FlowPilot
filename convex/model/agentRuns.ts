@@ -18,6 +18,8 @@ export async function startAgentRun(
     tenantId?: Id<"tenants">;
     skipReason?: string;
     failToolOnce?: string;
+    /** Set for eval-set emails: the run stops after the draft. */
+    evalCase?: { batchId: string; caseId: string };
   },
 ) {
   const existing = await ctx.db
@@ -40,6 +42,11 @@ export async function startAgentRun(
     model: AGENT_MODEL,
     promptVersion: PROMPT_VERSION,
     failToolOnce: args.failToolOnce,
+    ...(args.evalCase && {
+      mode: "eval" as const,
+      evalBatchId: args.evalCase.batchId,
+      evalCaseId: args.evalCase.caseId,
+    }),
     startedAt: now,
     ...(args.skipReason && { finishedAt: now }),
   });

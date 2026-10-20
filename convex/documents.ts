@@ -12,7 +12,7 @@ import {
   type MutationCtx,
   query,
 } from "./_generated/server";
-import { requireUserId } from "./lib/auth";
+import { requireOwner, requireUserId } from "./lib/auth";
 import {
   emailFromFilename,
   linkDocumentToTenant,
@@ -36,7 +36,7 @@ const MAX_QUERY_CHARS = 500;
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    await requireUserId(ctx);
+    await requireOwner(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -48,7 +48,7 @@ export const generateUploadUrl = mutation({
 export const create = mutation({
   args: { storageId: v.id("_storage"), filename: v.string() },
   handler: async (ctx, { storageId, filename }) => {
-    await requireUserId(ctx);
+    await requireOwner(ctx);
     const file = await ctx.db.system.get(storageId);
     if (file === null) {
       throw new ConvexError("Upload not found");
@@ -149,7 +149,7 @@ export const listForTenant = query({
 export const linkTenant = mutation({
   args: { documentId: v.id("documents"), tenantEmail: v.string() },
   handler: async (ctx, { documentId, tenantEmail }) => {
-    await requireUserId(ctx);
+    await requireOwner(ctx);
     const tenant = await findTenantByEmail(ctx, tenantEmail);
     if (tenant === null) {
       throw new ConvexError(`No tenant with email ${tenantEmail.trim()}`);

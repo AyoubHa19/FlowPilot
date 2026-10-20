@@ -47,6 +47,7 @@ export async function proposeAction(
   return await ctx.db.insert("approvals", {
     ...args,
     threadId: run.threadId,
-    status: "pending",
+    // Eval runs record what the agent would propose, but nothing can act on it.
+    status: run.mode === "eval" ? "eval" : "pending",
   });
 }

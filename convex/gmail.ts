@@ -10,7 +10,7 @@ import {
   mutation,
   query,
 } from "./_generated/server";
-import { requireUserId } from "./lib/auth";
+import { requireOwner, requireUserId } from "./lib/auth";
 import { decryptSecret, encryptSecret } from "./lib/crypto";
 import {
   authorizationUrl,
@@ -55,7 +55,7 @@ export const status = query({
 export const startConnect = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await requireUserId(ctx);
+    const userId = await requireOwner(ctx);
     const state = bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));
     await ctx.db.insert("oauthStates", { state, userId, expiresAt: Date.now() + STATE_TTL_MS });
     return authorizationUrl(state);

@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
-import { requireUserId } from "./lib/auth";
+import { requireOwner, requireUserId } from "./lib/auth";
 import { ingestMessage, queueOutbound, SIMULATED_INBOX } from "./model/inbox";
 import { replySubject } from "./model/mime";
 import { normalizeEmail } from "./model/properties";
@@ -16,7 +16,8 @@ export const listThreads = query({
     await requireUserId(ctx);
     const result = await ctx.db
       .query("emailThreads")
-      .withIndex("by_last_message")
+      // eval === undefined: real and simulated mail, never the eval set.
+      .withIndex("by_eval_last_message", (q) => q.eq("eval", undefined))
       .order("desc")
       .paginate(paginationOpts);
     const page = await Promise.all(
@@ -105,6 +106,8 @@ export const queueReply = mutation({
     }
     const thread = await ctx.db.get(threadId);
     if (thread === null) throw new ConvexError("Conversation not found");
+    // Replying to real email is owner-only; the demo account uses simulated mail.
+    if (!thread.simulated) await requireOwner(ctx);
     const messageId = await queueOutbound(ctx, thread, { subject: replySubject(thread.subject), body: text });
     await ctx.scheduler.runAfter(0, internal.gmail.sendReply, { messageId });
     return messageId;

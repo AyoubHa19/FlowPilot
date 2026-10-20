@@ -61,6 +61,8 @@ export type IncomingMessage = {
   automatedReason?: string;
   /** Dev-only fault injection, passed to the agent run. */
   failToolOnce?: string;
+  /** Eval-set email: hidden from the inbox, run stops after the draft. */
+  evalCase?: { batchId: string; caseId: string };
 };
 
 /**
@@ -100,6 +102,7 @@ export async function ingestMessage(
       counterpartName: counterpart.name,
       snippet,
       simulated: msg.simulated,
+      ...(msg.evalCase && { eval: true }),
     });
     thread = (await ctx.db.get(threadId))!;
   } else if (msg.receivedAt >= thread.lastMessageAt) {
@@ -133,6 +136,7 @@ export async function ingestMessage(
       tenantId: tenant?._id,
       skipReason: msg.automatedReason,
       failToolOnce: msg.failToolOnce,
+      evalCase: msg.evalCase,
     });
   }
   return { messageId, threadId: thread._id, created: true };

@@ -12,7 +12,7 @@ import {
   query,
   type MutationCtx,
 } from "./_generated/server";
-import { requireUserId } from "./lib/auth";
+import { requireOwner, requireUserId } from "./lib/auth";
 import {
   DEFAULT_NOTICE_PERIOD_DAYS,
   IMPORT_COLUMNS,
@@ -41,7 +41,7 @@ const rowValidator = v.record(v.string(), v.string());
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    await requireUserId(ctx);
+    await requireOwner(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -50,7 +50,7 @@ export const generateUploadUrl = mutation({
 export const start = mutation({
   args: { storageId: v.id("_storage"), filename: v.string() },
   handler: async (ctx, { storageId, filename }) => {
-    await requireUserId(ctx);
+    await requireOwner(ctx);
     const file = await ctx.db.system.get(storageId);
     if (file === null) {
       throw new ConvexError("Upload not found");

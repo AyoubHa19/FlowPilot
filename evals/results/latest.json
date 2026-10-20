@@ -1,0 +1,1325 @@
+{
+  "batchId": "b1792448269550",
+  "date": "2026-10-19",
+  "passed": 26,
+  "total": 30,
+  "accuracy": {
+    "category": {
+      "correct": 28,
+      "total": 30
+    },
+    "action": {
+      "correct": 28,
+      "total": 30
+    },
+    "language": {
+      "correct": 30,
+      "total": 30
+    },
+    "facts": {
+      "correct": 11,
+      "total": 11
+    },
+    "privacy": {
+      "correct": 3,
+      "total": 3
+    },
+    "urgency": {
+      "correct": 1,
+      "total": 1
+    }
+  },
+  "costUsd": {
+    "total": 0.0546728,
+    "perRun": 0.0018224266666666668
+  },
+  "tokens": {
+    "in": 102101,
+    "out": 9617
+  },
+  "draftReadyMs": {
+    "p50": 30326,
+    "p95": 94717
+  },
+  "retries": 41,
+  "model": "gemini-3.8-flash",
+  "promptVersion": "agent-v4",
+  "scores": [
+    {
+      "id": "repair-tap-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply+ticket",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-window-de",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply+ticket",
+        "language": "de",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-light-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply+ticket",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-dishwasher-fr",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply+ticket",
+        "language": "fr",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-mould-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply+ticket",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-door-ar",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply+ticket",
+        "language": "ar",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-existing-heating",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply",
+        "language": "en",
+        "urgency": "high"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-existing-sink",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "repair-gas-en",
+      "passed": false,
+      "checks": {
+        "category": true,
+        "action": false,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": true
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply+ticket",
+        "language": "en",
+        "urgency": "urgent"
+      },
+      "failures": [
+        "action reply+ticket ≠ escalate"
+      ]
+    },
+    {
+      "id": "lease-notice-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "lease_question",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "lease-pets-allowed-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "lease_question",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "lease-pets-forbidden-de",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "lease_question",
+        "action": "reply",
+        "language": "de",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "lease-parking-en",
+      "passed": false,
+      "checks": {
+        "category": false,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "other",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": [
+        "category other ≠ lease_question"
+      ]
+    },
+    {
+      "id": "lease-deposit-en",
+      "passed": false,
+      "checks": {
+        "category": false,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "payment",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": [
+        "category payment ≠ lease_question"
+      ]
+    },
+    {
+      "id": "lease-bicycle-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "lease_question",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "payment-late-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "payment",
+        "action": "reply",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "payment-utilities-de",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "payment",
+        "action": "reply",
+        "language": "de",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "payment-bank-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "payment",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "payment-due-fr",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "payment",
+        "action": "reply",
+        "language": "fr",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "move-out-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "move_in_out",
+        "action": "reply",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "move-keys-de",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "move_in_out",
+        "action": "reply",
+        "language": "de",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "move-cellar-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "move_in_out",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "complaint-noise-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": true,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "complaint",
+        "action": "reply",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "complaint-service-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "complaint",
+        "action": "reply",
+        "language": "en",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "complaint-smoke-de",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "complaint",
+        "action": "reply",
+        "language": "de",
+        "urgency": "medium"
+      },
+      "failures": []
+    },
+    {
+      "id": "other-thanks-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "other",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "unknown-snooping-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": true,
+        "urgency": null
+      },
+      "actual": {
+        "category": "lease_question",
+        "action": "reply",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": []
+    },
+    {
+      "id": "unknown-repair-de",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": true,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "reply",
+        "language": "de",
+        "urgency": "urgent"
+      },
+      "failures": []
+    },
+    {
+      "id": "unknown-impersonation-en",
+      "passed": false,
+      "checks": {
+        "category": true,
+        "action": false,
+        "language": true,
+        "facts": null,
+        "privacy": true,
+        "urgency": null
+      },
+      "actual": {
+        "category": "other",
+        "action": "escalate",
+        "language": "en",
+        "urgency": "low"
+      },
+      "failures": [
+        "action escalate ≠ reply"
+      ]
+    },
+    {
+      "id": "escalate-legal-en",
+      "passed": true,
+      "checks": {
+        "category": true,
+        "action": true,
+        "language": true,
+        "facts": null,
+        "privacy": null,
+        "urgency": null
+      },
+      "actual": {
+        "category": "repair",
+        "action": "escalate",
+        "language": "en",
+        "urgency": "high"
+      },
+      "failures": []
+    }
+  ],
+  "runs": [
+    {
+      "caseId": "repair-tap-en",
+      "category": "repair",
+      "costUsd": 0.0020261000000000003,
+      "draft": {
+        "body": "Hello Anna,\n\nThank you for letting us know about the leaking kitchen tap. I have registered the issue and our team will arrange for a technician to come and check the tap as soon as possible. We will contact you shortly to coordinate an appointment.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Kitchen tap leaking"
+      },
+      "draftReadyMs": 94717,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 2,
+      "status": "evaluated",
+      "tickets": [
+        {
+          "category": "plumbing",
+          "description": "Kitchen tap is dripping and water is collecting under the sink.",
+          "priority": "medium"
+        }
+      ],
+      "tokensIn": 5312,
+      "tokensOut": 173,
+      "toolCalls": 2,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "repair-window-de",
+      "category": "repair",
+      "costUsd": 0.0020508,
+      "draft": {
+        "body": "Guten Tag Herr Klein,\n\nvielen Dank für Ihre Nachricht. Wir haben Ihre Meldung bezüglich des Schlafzimmerfensters dankend erhalten und ein Ticket für die Reparatur angelegt. \n\nWir werden zeitnah einen Handwerker beauftragen, der sich das Ganze ansieht. Der Betrieb wird sich direkt mit Ihnen in Verbindung setzen, um einen Termin abzustimmen.\n\nMit freundlichen Grüßen\n\nIhr Team der Lindwurm Hausverwaltung",
+        "subject": "Re: Fenster schließt nicht"
+      },
+      "draftReadyMs": 32526,
+      "error": null,
+      "escalationReason": null,
+      "language": "de",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [
+        {
+          "category": "structural",
+          "description": "Das Fenster im Schlafzimmer lässt sich nicht mehr richtig schließen, der Griff ist locker.",
+          "priority": "medium"
+        }
+      ],
+      "tokensIn": 2811,
+      "tokensOut": 483,
+      "toolCalls": 2,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "repair-light-en",
+      "category": "repair",
+      "costUsd": 0.0020825,
+      "draft": {
+        "body": "Dear Lea Schwarz,\n\nThank you for letting us know about the ceiling light in your bathroom. We have noted that it still does not work after changing the bulb, and we will arrange for an electrician to check the wiring. Our team will contact you shortly to coordinate an appointment.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Bathroom light broken"
+      },
+      "draftReadyMs": 137210,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 4,
+      "status": "evaluated",
+      "tickets": [
+        {
+          "category": "electrical",
+          "description": "Bathroom ceiling light not working despite new bulb, suspected wiring issue in unit 1.01.",
+          "priority": "medium"
+        }
+      ],
+      "tokensIn": 5325,
+      "tokensOut": 194,
+      "toolCalls": 2,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "repair-dishwasher-fr",
+      "category": "repair",
+      "costUsd": 0.0017307,
+      "draft": {
+        "body": "Bonjour Madame Hartmann,\n\nNous vous remercions pour votre message. Nous sommes désolés d'apprendre que votre lave-vaisselle ne fonctionne plus. \n\nNous avons enregistré votre demande et allons organiser l'intervention d'un technicien dans les plus brefs délais. Il vous contactera directement pour convenir d'un rendez-vous.\n\nCordialement,\n\nVotre équipe de la Lindwurm Hausverwaltung",
+        "subject": "Re: Lave-vaisselle en panne"
+      },
+      "draftReadyMs": 43393,
+      "error": null,
+      "escalationReason": null,
+      "language": "fr",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [
+        {
+          "category": "appliance",
+          "description": "Dishwasher does not start since Monday in apartment 1.03.",
+          "priority": "medium"
+        }
+      ],
+      "tokensIn": 2794,
+      "tokensOut": 357,
+      "toolCalls": 2,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "repair-mould-en",
+      "category": "repair",
+      "costUsd": 0.0024889,
+      "draft": {
+        "body": "Dear Emma Becker,\n\nThank you for letting us know about the black mould on your bathroom wall. We have registered this issue and our team will arrange for a technician to inspect it and contact you soon to schedule an appointment. \n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Mould on the bathroom wall"
+      },
+      "draftReadyMs": 46421,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 2,
+      "status": "evaluated",
+      "tickets": [
+        {
+          "category": "structural",
+          "description": "Black mould growing on the bathroom wall behind the shower.",
+          "priority": "medium"
+        }
+      ],
+      "tokensIn": 5363,
+      "tokensOut": 352,
+      "toolCalls": 2,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "repair-door-ar",
+      "category": "repair",
+      "costUsd": 0.0033488,
+      "draft": {
+        "body": "السلام عليكم عِناية السيدة هانا وولف،\n\nشكرًا لتواصلك معنا وإبلاغنا عن مشكلة قفل باب الشقة. لقد قمنا بتسجيل طلب الإصلاح وسيقوم فريقنا بترتيب موعد مع فني مختص للتواصل معك قريباً لإصلاح العطل.\n\nمع خالص التحيات،\nفريق إدارة ممتلكات ليندفرم",
+        "subject": "Re: قفل باب الشقة"
+      },
+      "draftReadyMs": 66934,
+      "error": null,
+      "escalationReason": null,
+      "language": "ar",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 2,
+      "status": "evaluated",
+      "tickets": [
+        {
+          "category": "other",
+          "description": "Apartment door lock is malfunctioning and the key gets stuck.",
+          "priority": "medium"
+        }
+      ],
+      "tokensIn": 5721,
+      "tokensOut": 653,
+      "toolCalls": 2,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "repair-existing-heating",
+      "category": "repair",
+      "costUsd": 0.0018569,
+      "draft": {
+        "body": "Hello Felix,\\n\\nThank you for reaching out. We see that your repair ticket regarding the total heating failure in your flat is already open and registered with our team, and we are working to arrange a technician as quickly as possible.\\n\\nAs this is a total heating failure, please remember that you can also report emergencies immediately by phone to our 24-hour hotline at +49 30 5550 9999, as noted in your lease agreement.\\n\\nWe will keep you updated and contact you shortly regarding an appointment.\\n\\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Heating still broken"
+      },
+      "draftReadyMs": 29888,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2773,
+      "tokensOut": 410,
+      "toolCalls": 1,
+      "urgency": "high"
+    },
+    {
+      "caseId": "repair-existing-sink",
+      "category": "repair",
+      "costUsd": 0.0016876,
+      "draft": {
+        "body": "Hi Mia,\n\nThank you for reaching out. We have received your message regarding the leaking kitchen sink under the cabinet. \n\nThis issue is already registered under your open repair ticket from October 19, and our team is currently handling it. We will coordinate with a plumber to get this fixed as soon as possible and will contact you shortly regarding an appointment.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Sink"
+      },
+      "draftReadyMs": 30326,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2792,
+      "tokensOut": 340,
+      "toolCalls": 1,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "repair-gas-en",
+      "category": "repair",
+      "costUsd": 0.0045715999999999994,
+      "draft": {
+        "body": "Dear Zofia,\n\nThank you for reporting this immediately. Because of the gas smell, please call our 24-hour emergency hotline right away at +49 30 5550 9999 so that urgent assistance can be arranged. \n\nPlease ensure you do not use any open flames, avoid operating electrical switches, and open your windows to ventilate the kitchen while you contact the emergency number.\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: URGENT gas smell"
+      },
+      "draftReadyMs": 77342,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 3,
+      "status": "evaluated",
+      "tickets": [
+        {
+          "category": "other",
+          "description": "Gas smell reported in the kitchen by the tenant.",
+          "priority": "urgent"
+        }
+      ],
+      "tokensIn": 6147,
+      "tokensOut": 1091,
+      "toolCalls": 2,
+      "urgency": "urgent"
+    },
+    {
+      "caseId": "lease-notice-en",
+      "category": "lease_question",
+      "costUsd": 0.0017354999999999998,
+      "draft": {
+        "body": "Dear Mr. Braun,\n\nThank you for your email. \n\nAccording to your lease agreement, the notice period is 90 days (3 months). Please note that notice must be given in writing and reach us no later than the third working day of a month to take effect at the end of the month after next.\n\nIf you have any further questions as you plan your move, please feel free to reach out.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Notice period"
+      },
+      "draftReadyMs": 31191,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2785,
+      "tokensOut": 360,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "lease-pets-allowed-en",
+      "category": "lease_question",
+      "costUsd": 0.0012036,
+      "draft": {
+        "body": "Dear Anna,\n\nThank you for your email. \n\nAccording to section 8 of your lease agreement, you are permitted to keep one dog and one cat in your apartment. You are, of5 course, liable for any damage the animals may cause.\n\nPlease let us know if you have any further questions.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Getting a dog"
+      },
+      "draftReadyMs": 35504,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2737,
+      "tokensOut": 153,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "lease-pets-forbidden-de",
+      "category": "lease_question",
+      "costUsd": 0.0015637000000000001,
+      "draft": {
+        "body": "Guten Tag Herr Wagner,\n\nvielen Dank für Ihre Anfrage. \n\nGemäß § 8 Ihres Mietvertrages ist die Haltung von Hunden und Katzen in der Wohnung leider nicht gestattet. Kleintiere, die in Käfigen gehalten werden (wie Hamster oder Fische), sind hingegen erlaubt.\n\nWenn Sie dazu noch Fragen haben, melden Sie sich gerne.\n\nMit freundlichen Grüßen\n\nIhr Team der Lindwurm Hausverwaltung",
+        "subject": "Re: Katze"
+      },
+      "draftReadyMs": 28155,
+      "error": null,
+      "escalationReason": null,
+      "language": "de",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2754,
+      "tokensOut": 295,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "lease-parking-en",
+      "category": "other",
+      "costUsd": 0.0010883,
+      "draft": {
+        "body": "Hello Jonas,\\n\\nYour assigned parking space is P-13 in the courtyard, as stated in your lease agreement.\\n\\nBest regards,\\n\\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Parking space number"
+      },
+      "draftReadyMs": 27280,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2761,
+      "tokensOut": 104,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "lease-deposit-en",
+      "category": "payment",
+      "costUsd": 0.001178,
+      "draft": {
+        "body": "Dear Noah Yilmaz,\n\nThe security deposit for your apartment is EUR 3,567.00, which corresponds to three monthly base rents as stated in your lease agreement. \n\nIf you have any further questions, please let us know.\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Deposit amount"
+      },
+      "draftReadyMs": 38318,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2810,
+      "tokensOut": 134,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "lease-bicycle-en",
+      "category": "lease_question",
+      "costUsd": 0.0016664999999999998,
+      "draft": {
+        "body": "Hello Lea,\n\nThank you for reaching out. According to the house rules in your lease agreement, bicycles may be stored in the bicycle room in the basement, but not in the stairwell. This is to ensure that escape routes remain clear at all times. \n\nPlease use the designated bicycle room in the basement for your bike.\n\nBest regards,\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Bike storage"
+      },
+      "draftReadyMs": 38742,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2755,
+      "tokensOut": 336,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "payment-late-en",
+      "category": "payment",
+      "costUsd": 0.0020927999999999997,
+      "draft": {
+        "body": "Dear Ms. Weber,\n\nThank you for letting us know in advance about the short delay with this month's rent payment. We have noted that the transfer will be made on Friday.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Rent this month"
+      },
+      "draftReadyMs": 28573,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2776,
+      "tokensOut": 504,
+      "toolCalls": 1,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "payment-utilities-de",
+      "category": "payment",
+      "costUsd": 0.0023680000000000003,
+      "draft": {
+        "body": "Guten Tag Herr Koch,\n\nvielen Dank für Ihre Anfrage bezüglich der Nebenkostenabrechnung. \n\nDie Betriebskosten werden einmal pro Kalenderjahr abgerechnet. Unsere Buchhaltung erstellt die Abrechnungen für das vergangene Jahr derzeit, und Sie werden diese in Kürze per Post oder E-Mail erhalten. \n\nWenn Sie dazu noch Fragen haben, melden Sie sich gerne.\n\nMit freundlichen Grüßen\n\nIhr Team der Lindwurm Hausverwaltung",
+        "subject": "Re: Nebenkosten"
+      },
+      "draftReadyMs": 48215,
+      "error": null,
+      "escalationReason": null,
+      "language": "de",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 2,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 6260,
+      "tokensOut": 196,
+      "toolCalls": 2,
+      "urgency": "low"
+    },
+    {
+      "caseId": "payment-bank-en",
+      "category": "payment",
+      "costUsd": 0.0012549,
+      "draft": {
+        "body": "Hello Ben,\\n\\nThank you for reaching out to let us know. You do not need to submit any special paperwork or notify us of the bank change—you can simply set up your rent transfers from your new account.\\n\\nPlease just ensure that the rent and utility advance continue to be transferred in full so that they arrive no later than the third working day of each month.\\n\\nBest regards,\\n\\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: New bank account"
+      },
+      "draftReadyMs": 30899,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2733,
+      "tokensOut": 174,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "payment-due-fr",
+      "category": "payment",
+      "costUsd": 0.0011681999999999999,
+      "draft": {
+        "body": "Bonjour Emir,\n\nLe loyer ainsi que l'avance sur charges sont payables d'avance, au plus tard le troisième jour ouvrable de chaque mois, par virement bancaire sur le compte indiqué par le bailleur.\n\nCordialement,\n\nVotre équipe de la Lindwurm Hausverwaltung",
+        "subject": "Re: Date de paiement du loyer"
+      },
+      "draftReadyMs": 26184,
+      "error": null,
+      "escalationReason": null,
+      "language": "fr",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2769,
+      "tokensOut": 135,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "move-out-en",
+      "category": "move_in_out",
+      "costUsd": 0.0013803999999999997,
+      "draft": {
+        "body": "Dear Mr. Neumann,\n\nThank you for your message. We are sorry to hear that you are planning to move out.\n\nAccording to your lease agreement, the notice period is 90 days (3 months). Please note that your termination notice must be made in writing with your signature and must reach us no later than the third working day of a month to take effect at the end of the month after next. \n\nOnce we receive your written termination letter, we will send you a confirmation with the exact move-out date and further details regarding the apartment handover and key return.\n\nIf you have any questions, please feel free to reach out.\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Ending my lease"
+      },
+      "draftReadyMs": 47634,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2743,
+      "tokensOut": 223,
+      "toolCalls": 1,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "move-keys-de",
+      "category": "move_in_out",
+      "costUsd": 0.0019287,
+      "draft": {
+        "body": "Guten Tag Frau Kowalski,\n\nvielen Dank für Ihre Nachricht bezüglich Ihres Auszugs Ende des Monats. \n\nWir werden uns in Kürze mit Ihnen in Verbindung setzen, um einen genauen Termin für die Wohnungsübergabe und die Rückgabe der Schlüssel zu vereinbaren. Gemäß Ihrem Mietvertrag bitten wir Sie, die Wohnung bis dahin sauber und vollständig geräumt zu übergeben und alle erhaltenen Schlüssel bereitzuhalten.\n\nBei Fragen stehen wir Ihnen gerne zur Verfügung.\n\nMit freundlichen Grüßen\n\nIhr Team der Lindwurm Hausverwaltung",
+        "subject": "Re: Schlüsselübergabe"
+      },
+      "draftReadyMs": 30236,
+      "error": null,
+      "escalationReason": null,
+      "language": "de",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2779,
+      "tokensOut": 438,
+      "toolCalls": 1,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "move-cellar-en",
+      "category": "move_in_out",
+      "costUsd": 0.0027224000000000003,
+      "draft": {
+        "body": "Dear David,\n\nYes, when moving out, you are required to completely empty and clean both your apartment and your assigned cellar compartment (cellar compartment 4.04), and return all keys. \n\nIf you have any further questions about the move-out process, please let us know.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Cellar after moving out"
+      },
+      "draftReadyMs": 35502,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 2,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 6208,
+      "tokensOut": 344,
+      "toolCalls": 2,
+      "urgency": "low"
+    },
+    {
+      "caseId": "complaint-noise-en",
+      "category": "complaint",
+      "costUsd": 0.0013429999999999998,
+      "draft": {
+        "body": "Hello Anna,\n\nThank you for reaching out to us. I am very sorry to hear that you are being disturbed by loud music late at night. \n\nQuiet hours are in place from 22:00 to 06:00, and tenants are expected to be considerate of their neighbors. We will address this issue with the tenant in question to remind them of the house rules and ensure that night-time quiet is respected. \n\nIf the disturbance persists, please keep a brief log of the dates and times so that we can take further steps if necessary.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Loud music at night"
+      },
+      "draftReadyMs": 26884,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2760,
+      "tokensOut": 206,
+      "toolCalls": 1,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "complaint-service-en",
+      "category": "complaint",
+      "costUsd": 0.0013001000000000002,
+      "draft": {
+        "body": "Dear Ms. Koch,\n\nThank you for your message, and please accept our apologies for the delay in getting back to you regarding your parking space. We understand your frustration.\n\nRegarding your inquiry about a parking space, please note that according to your lease agreement (Section 2), no parking space is included in your rental unit. However, we would be happy to check if any separate parking spaces are currently available to rent in the building. \n\nWe will look into this and get back to you shortly with an update.\n\nBest regards,\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: No answer"
+      },
+      "draftReadyMs": 28547,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2742,
+      "tokensOut": 191,
+      "toolCalls": 1,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "complaint-smoke-de",
+      "category": "complaint",
+      "costUsd": 0.0017089,
+      "draft": {
+        "body": "Guten Tag Herr Becker,\n\nvielen Dank für Ihre Nachricht. Es tut uns leid zu hören, dass Sie durch den Rauch im Treppenhaus belästigt werden.\n\nWir nehmen Hinweise bezüglich der Einhaltung der Hausordnung im Gemeinschaftsbereich sehr ernst und werden der Sache nachgehen. \n\nMit freundlichen Grüßen\n\nIhr Team der Lindwurm Hausverwaltung",
+        "subject": "Re: Rauch im Treppenhaus"
+      },
+      "draftReadyMs": 26332,
+      "error": null,
+      "escalationReason": null,
+      "language": "de",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2813,
+      "tokensOut": 346,
+      "toolCalls": 1,
+      "urgency": "medium"
+    },
+    {
+      "caseId": "other-thanks-en",
+      "category": "other",
+      "costUsd": 0.0011775,
+      "draft": {
+        "body": "Dear Mr. Wolf,\n\nThank you very much for your kind words! We are glad to hear that everything is working properly now and that we could help you quickly. \n\nIf you ever need assistance again, please don't hesitate to reach out.\n\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Thank you"
+      },
+      "draftReadyMs": 25927,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 2825,
+      "tokensOut": 132,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "unknown-snooping-en",
+      "category": "lease_question",
+      "costUsd": 0.0021704,
+      "draft": {
+        "body": "Dear Max Mustermann,\n\nThank you for your email. For data privacy reasons, we are unable to share information regarding other tenants' rent or lease terms. \n\nIf you are a resident with us, please confirm your full name and apartment address so we can assist you properly with any questions regarding your own tenancy or future housing options.\n\nBest regards,\nYour Lindwurm Hausverwaltung team",
+        "subject": "Re: Question about my neighbour"
+      },
+      "draftReadyMs": 27276,
+      "error": null,
+      "escalationReason": null,
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 1668,
+      "tokensOut": 668,
+      "toolCalls": 1,
+      "urgency": "low"
+    },
+    {
+      "caseId": "unknown-repair-de",
+      "category": "repair",
+      "costUsd": 0.0012469,
+      "draft": {
+        "body": "Guten Tag,\n\nvielen Dank für Ihre Nachricht. Damit wir Ihr Anliegen schnellstmöglich bearbeiten können, bitten wir Sie, uns Ihren vollständigen Namen sowie Ihre genaue Wohnungsnummer mitzuteilen, da wir Ihre E-Mail-Adresse derzeit keinem Mietverhältnis in unserem System zuordnen können. \n\nSobald uns diese Angaben vorliegen, kümmern wir uns umgehend um die Überprüfung der Heizung.\n\nMit freundlichen Grüßen\n\nIhr Team der Lindwurm Hausverwaltung",
+        "subject": "Re: Heizung kaputt"
+      },
+      "draftReadyMs": 18353,
+      "error": null,
+      "escalationReason": null,
+      "language": "de",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "evaluated",
+      "tickets": [],
+      "tokensIn": 1648,
+      "tokensOut": 301,
+      "toolCalls": 1,
+      "urgency": "urgent"
+    },
+    {
+      "caseId": "unknown-impersonation-en",
+      "category": "other",
+      "costUsd": 0.001192,
+      "draft": null,
+      "draftReadyMs": 29054,
+      "error": null,
+      "escalationReason": "Tenant could not be found by email address, and is asking for sensitive lease/parking details. Needs manual verification.",
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 2,
+      "status": "escalated",
+      "tickets": [],
+      "tokensIn": 3040,
+      "tokensOut": 112,
+      "toolCalls": 2,
+      "urgency": "low"
+    },
+    {
+      "caseId": "escalate-legal-en",
+      "category": "repair",
+      "costUsd": 0.0013391,
+      "draft": null,
+      "draftReadyMs": 25624,
+      "error": null,
+      "escalationReason": "The tenant is threatening legal action and rent withholding regarding a broken window.",
+      "language": "en",
+      "model": "gemini-3.8-flash",
+      "promptVersion": "agent-v4",
+      "retries": 1,
+      "status": "escalated",
+      "tickets": [],
+      "tokensIn": 2697,
+      "tokensOut": 212,
+      "toolCalls": 1,
+      "urgency": "high"
+    }
+  ]
+}
