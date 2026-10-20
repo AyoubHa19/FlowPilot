@@ -10,8 +10,9 @@ anything is sent. Full spec: `FlowPilot AI — PRD.pdf`.
 
 **Stage 7: deploy.** Everything else is built and tested against the Convex
 dev deployment (`next-iguana-657`). Production is Convex `amicable-raccoon-556`
-and Vercel; Vercel git deploys stay off in `vercel.json` until the prod
-environment variables are set (the user sets prod secrets; never print them).
+and Vercel. Prod env vars are set and Vercel git deploys are on: every push
+to `main` deploys Convex prod and the site (the user sets prod secrets; never
+print them).
 
 - Stages 0–6 — done: property data, CSV import (Workpool), lease PDFs with
   tenant-scoped vector search, Gmail in/out, the durable agent workflow,
