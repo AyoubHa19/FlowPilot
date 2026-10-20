@@ -19,8 +19,10 @@ const BACKGROUND_IMAGE: string | null = null;
 
 const CELL = 22; // px between glyphs
 const RADIUS = 280; // px, size of the revealed area
-const GLYPHS = "ABCDEFGHJKLMNPRSTUVWXYZ0123456789@#%&*+=<>/\\[]{}()?!:;.,~^";
-const COLORS = ["#7c8cff", "#a78bfa", "#f472b6", "#34d399", "#22d3ee", "#facc15", "#f87171"];
+// Email and lease vocabulary in the FlowPilot colors: signal lime, violet,
+// and a cool white.
+const GLYPHS = "@@#&%*+=<>/\\[]{}()?!:;.,~^ABCDEFGHJKLMNPRSTUVWXYZ0123456789€§";
+const COLORS = ["#c8f135", "#c8f135", "#a78bfa", "#8b9cff", "#e4e7ee", "#e4e7ee"];
 const DENSITY = 0.42; // share of cells that hold a glyph
 const FLICKER = 0.012; // chance per visible glyph per frame to change
 
