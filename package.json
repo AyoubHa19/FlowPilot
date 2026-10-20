@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "generate:import-csv": "node scripts/generate-import-csv.mjs",
     "generate:lease-pdfs": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-lease-pdfs.ts",
-    "eval": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/run-evals.ts"
+    "eval": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/run-evals.ts",
+    "upload:leases": "node scripts/upload-leases.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.100",

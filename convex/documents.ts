@@ -49,36 +49,65 @@ export const create = mutation({
   args: { storageId: v.id("_storage"), filename: v.string() },
   handler: async (ctx, { storageId, filename }) => {
     await requireOwner(ctx);
-    const file = await ctx.db.system.get(storageId);
-    if (file === null) {
-      throw new ConvexError("Upload not found");
-    }
-    if (!filename.toLowerCase().endsWith(".pdf")) {
-      await ctx.storage.delete(storageId);
-      throw new ConvexError(`${filename}: only PDF files are supported`);
-    }
-    if (file.size > MAX_PDF_BYTES) {
-      await ctx.storage.delete(storageId);
-      throw new ConvexError(`${filename}: larger than 20 MB`);
-    }
+    return await registerUpload(ctx, storageId, filename);
+  },
+});
 
-    const documentId = await ctx.db.insert("documents", {
-      storageId,
-      filename,
-      kind: "other",
-      status: "queued",
-      chunkCount: 0,
-    });
+/**
+ * The same registration for files stored by an admin script (no browser).
+ * Skips a lease the tenant already has, so the script can run twice.
+ *
+ *   npm run upload:leases -- --prod
+ */
+export const registerFromAdmin = internalMutation({
+  args: { storageId: v.id("_storage"), filename: v.string() },
+  handler: async (ctx, { storageId, filename }) => {
     const email = emailFromFilename(filename);
     const tenant = email ? await findTenantByEmail(ctx, email) : null;
     if (tenant) {
-      await linkDocumentToTenant(ctx, documentId, tenant._id);
+      const existing = await ctx.db
+        .query("documents")
+        .withIndex("by_tenant", (q) => q.eq("tenantId", tenant._id))
+        .take(20);
+      if (existing.some((doc) => doc.filename === filename)) {
+        await ctx.storage.delete(storageId);
+        return null;
+      }
     }
-
-    await enqueueProcessing(ctx, documentId);
-    return documentId;
+    return await registerUpload(ctx, storageId, filename);
   },
 });
+
+async function registerUpload(ctx: MutationCtx, storageId: Id<"_storage">, filename: string) {
+  const file = await ctx.db.system.get(storageId);
+  if (file === null) {
+    throw new ConvexError("Upload not found");
+  }
+  if (!filename.toLowerCase().endsWith(".pdf")) {
+    await ctx.storage.delete(storageId);
+    throw new ConvexError(`${filename}: only PDF files are supported`);
+  }
+  if (file.size > MAX_PDF_BYTES) {
+    await ctx.storage.delete(storageId);
+    throw new ConvexError(`${filename}: larger than 20 MB`);
+  }
+
+  const documentId = await ctx.db.insert("documents", {
+    storageId,
+    filename,
+    kind: "other",
+    status: "queued",
+    chunkCount: 0,
+  });
+  const email = emailFromFilename(filename);
+  const tenant = email ? await findTenantByEmail(ctx, email) : null;
+  if (tenant) {
+    await linkDocumentToTenant(ctx, documentId, tenant._id);
+  }
+
+  await enqueueProcessing(ctx, documentId);
+  return documentId;
+}
 
 async function enqueueProcessing(ctx: MutationCtx, documentId: Id<"documents">) {
   await documentPool.enqueueAction(

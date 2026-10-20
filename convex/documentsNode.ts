@@ -4,6 +4,7 @@ import { NonRetryableError } from "@convex-dev/workpool";
 import { v } from "convex/values";
 import { extractText, getDocumentProxy } from "unpdf";
 import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";
 import { chunkText } from "./model/documents";
 import { embedDocuments } from "./model/embeddings";
@@ -58,5 +59,18 @@ export const process = internalAction({
       });
     }
     await ctx.runMutation(internal.documents.finish, { documentId, chunkCount: chunks.length });
+  },
+});
+
+/**
+ * Stores one PDF sent by the admin upload script (base64, small leases) and
+ * registers it like a browser upload. Internal: only the deploy key can call it.
+ */
+export const importFromAdmin = internalAction({
+  args: { filename: v.string(), base64: v.string() },
+  handler: async (ctx, { filename, base64 }): Promise<Id<"documents"> | null> => {
+    const bytes = Buffer.from(base64, "base64");
+    const storageId = await ctx.storage.store(new Blob([bytes], { type: "application/pdf" }));
+    return await ctx.runMutation(internal.documents.registerFromAdmin, { storageId, filename });
   },
 });
