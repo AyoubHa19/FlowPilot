@@ -24,8 +24,9 @@ print them).
   FlowPilot identity (envelope-and-flight-path logo, signal lime, Instrument
   Serif titles) and the landing page with the scroll story
   (`components/landing/`).
-- Left: Convex prod env vars, Google redirect URI for prod, Vercel env vars,
-  deploy, seed prod, demo account, video, public repo.
+- Deployed: https://flow-pilot-rose.vercel.app (prod seeded, 60 leases via
+  `npm run upload:leases -- --prod`, owner and demo accounts). Left: video,
+  public repo.
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.

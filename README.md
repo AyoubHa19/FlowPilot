@@ -8,7 +8,7 @@ Built with Next.js 16, Convex (Workflow, Workpool, vector search, crons), Convex
 Auth, the Vercel AI SDK with Google Gemini, the Gmail API and shadcn/ui. Every
 piece runs on a free tier.
 
-- **Live demo:** _added after the production deploy_ (demo login on the sign-in page)
+- **Live demo:** [flow-pilot-rose.vercel.app](https://flow-pilot-rose.vercel.app): click **Try the demo** on the sign-in page. The demo account sees everything and can run the agent on simulated email; real email and uploads are owner-only.
 - **Demo video (3 min):** _link_
 - **Decisions log:** [docs/decisions.md](docs/decisions.md): one entry per technical choice, per stage
 
