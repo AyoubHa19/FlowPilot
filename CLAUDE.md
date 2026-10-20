@@ -8,40 +8,23 @@ anything is sent. Full spec: `FlowPilot AI — PRD.pdf`.
 
 ## Current stage
 
-**Local only until Stage 7.** Build and test against the Convex dev deployment
-(`next-iguana-657`) and `npm run dev`. Do not deploy to Vercel or Convex prod,
-and do not seed prod. Vercel auto-deploys are off in `vercel.json`; turn them
-back on in Stage 7.
+**Stage 7: deploy.** Everything else is built and tested against the Convex
+dev deployment (`next-iguana-657`). Production is Convex `amicable-raccoon-556`
+and Vercel; Vercel git deploys stay off in `vercel.json` until the prod
+environment variables are set (the user sets prod secrets; never print them).
 
-- Stage 0: Setup — done (an early Stage 0 build is still on Vercel and
-  Convex prod `amicable-raccoon-556`; both are stale).
-- **Stage 1: Property data — done.** Schema, idempotent seed, buildings /
-  building detail / tenant detail pages, tenant lookup by email.
-- **Stage 2: Bulk import — done.** CSV upload → parse action → 100-row
-  batches on the `importPool` Workpool → live counters on `importJobs`.
-  10,000 rows import in ~2 min; re-import adds nothing.
-- **Stage 3: Documents and knowledge base — done.** PDF upload → `documentPool`
-  Workpool → Node action (unpdf → chunkText → Gemini `gemini-embedding-2`,
-  768 dims) → `docChunks` with a vector index filtered by `tenantId`.
-  50 PDFs process in ~40s; search is tenant-scoped.
-- **Stage 4: Email in and out — done.** Gmail OAuth via Convex HTTP actions
-  (a dedicated test Gmail inbox, Google OAuth app in Testing mode), encrypted
-  tokens, minute cron sync on the history API, dedupe by
-  gmailMessageId, tenant linking, replies in the same Gmail thread, and a
-  simulate-email form for demos.
-- **Stage 5: Agent engine — done.** Every new inbound email starts a durable
-  Workflow run: classify (`gemini-3.5-flash-lite`) → context lookups → tool loop
-  (`gemini-3.8-flash`, max 8 tool calls, fallback model on retry) → draft.
-  Steps, tokens and cost logged in `agentRuns` / `agentSteps`. ~$0.002 and
-  ~30s per run. Prompts in `convex/prompts/` (current: agent-v4).
-- **Stage 6: Approvals and run timeline — done.** The model only proposes
-  (create_ticket, and the draft becomes send_reply); proposals wait in
-  `approvals`, the workflow sleeps on `awaitEvent("approval:<id>")`, and a
-  decision (approve / edit then approve / reject) wakes it. /approvals queue
-  with a live pending count, inline approval cards, live /runs/[id] timeline.
-  Verified live with Gmail: approve sent, reject sent nothing.
-- Next: **Stage 7: Quality, deploy, portfolio** (eval set of 30 emails, UI
-  states, rate-limit handling, cost per run, production deploy, README, demo).
+- Stages 0–6 — done: property data, CSV import (Workpool), lease PDFs with
+  tenant-scoped vector search, Gmail in/out, the durable agent workflow,
+  approvals with awaitEvent and the live run timeline.
+- **Stage 7 — done except the deploy.** 32-case eval (97% pass, prompt
+  `agent-v5`), safety emergencies (`flag_emergency` + safety draft), sign-up
+  allowlist and owner/demo roles (`requireOwner`), dark-only glass design with
+  the mouse-revealed glyph background (`components/cursor-field.tsx`), the
+  FlowPilot identity (envelope-and-flight-path logo, signal lime, Instrument
+  Serif titles) and the landing page with the scroll story
+  (`components/landing/`).
+- Left: Convex prod env vars, Google redirect URI for prod, Vercel env vars,
+  deploy, seed prod, demo account, video, public repo.
 
 Work one stage at a time. Do not start a stage until every "Done when" box of
 the previous one is ticked. Add one entry to `docs/decisions.md` per stage.
@@ -76,9 +59,10 @@ convex/             backend: schema, public functions (buildings, tenants, impor
   *.test.ts         convex-test unit tests (modules via test.setup.ts)
   _generated/       written by `npx convex dev`, never edit
 scripts/            node scripts writing test data to samples/ (gitignored)
-src/app/            Next.js routes: /signin, (dashboard)/inbox, /inbox/[id], /approvals,
+src/app/            Next.js routes: / (landing), /signin, (dashboard)/home, /inbox, /inbox/[id], /approvals, /runs,
                     /runs/[id], /buildings, /tenants/[id], /imports, /documents
-src/components/     app components; ui/ is shadcn (generated, edit sparingly)
+src/components/     app components; ui/ is shadcn (generated, edit sparingly);
+                    landing/ is the landing page; app-shell/ the sidebar layout and logo
 src/lib/            format.ts (cents → €, ISO dates), time.ts (x ago), download.ts
 src/proxy.ts        Next 16 "proxy" (formerly middleware): optimistic auth redirects
 docs/decisions.md   one short entry per technical choice

@@ -29,6 +29,10 @@ Everything is live in the dashboard: inbox, approvals queue with a pending
 count, a step-by-step run timeline (inputs, outputs, retries, tokens, cost),
 properties, CSV imports and lease documents.
 
+The public landing page (`/`) shows the agent at work: as you scroll, four
+real kinds of tenant email (repair, lease question, gas emergency, unknown
+sender) type themselves out and the agent's steps appear one by one.
+
 ## Architecture
 
 ```mermaid
@@ -133,6 +137,12 @@ Environment variables on the Convex deployment (never in the repo):
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Gemini (LLM and embeddings) |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Gmail OAuth (redirect URI `https://<deployment>.convex.site/gmail/oauth/callback`, scope `gmail.modify`) |
 | `TOKEN_ENCRYPTION_KEY` | 32 random bytes, base64: encrypts Gmail tokens at rest |
+| `ALLOWED_SIGNUP_EMAILS` | Comma-separated emails allowed to create an account (unset: anyone) |
+| `OWNER_EMAILS` | Comma-separated owner emails; everyone else is a demo user who can only act on simulated email (unset: everyone is an owner) |
+
+On Vercel: `CONVEX_DEPLOY_KEY` (the build runs `npx convex deploy`), and
+optionally `NEXT_PUBLIC_DEMO_EMAIL` / `NEXT_PUBLIC_DEMO_PASSWORD` for the
+"Try the demo" button on the sign-in page (a demo-role account).
 
 ## Tests
 
@@ -151,8 +161,10 @@ approval path, without calling Gemini.
 convex/            backend: schema, functions, workflow, crons, HTTP routes
   model/           plain logic: upserts, chunking, embeddings, Gmail client, MIME, tool registry
   prompts/         versioned prompts
-src/app/           Next.js routes (inbox, approvals, run timeline, properties, imports, documents)
-src/components/    UI components (shadcn/ui in components/ui)
+src/app/           Next.js routes: landing (/), sign-in, and the dashboard (inbox, approvals,
+                   run timeline, properties, imports, documents)
+src/components/    UI components (shadcn/ui in components/ui, landing/ for the landing page)
+public/landing/    app screenshots used on the landing page (demo data only)
 evals/             eval cases, scorer, results
 scripts/           test data generators and the eval runner
 docs/              decisions log, demo script

@@ -270,3 +270,27 @@ One short entry per technical choice, newest last.
   same state looks the same everywhere. A sidebar shell (sheet on mobile),
   a shared `PageHeader`, an overview page with the numbers a manager cares
   about, and a split-screen sign-in with an optional "Try the demo" button.
+
+## Stage 7 — Identity and landing page
+
+- **Dark only.** One theme is easier to keep consistent than two, and the
+  product reads as a tool you leave open. Cards are translucent "glass" over a
+  black background, so the background is part of the page.
+- **The background is revealed by the mouse.** A canvas of glyphs (email and
+  lease symbols: `@`, `€`, `§`, letters) shows only around the cursor and fades
+  with distance. No glow: a first version had a coloured light and it was too
+  much. On touch screens the reveal wanders on its own; reduced motion turns
+  the animation off. Written from scratch; the idea is common, the code and
+  palette are ours.
+- **Identity.** The logo is an envelope whose flap turns into a flight path
+  leaving it: mail that finds its own way, with a person at the controls. The
+  accent is a signal lime with violet second; titles use Instrument Serif,
+  body text Geist.
+- **The landing page tells the product by scrolling.** The structure follows
+  a pattern from melius.com (studied with REA's browser capture): a sticky
+  panel where the email types itself, and canvases where each agent step
+  appears and types its result as you reach it. Content, code and screenshots
+  are FlowPilot's own. On phones the panel pins under the header and the steps
+  run down a rail that fills in.
+- **Screenshots on the landing page are demo data only.** Pages that showed the
+  real Gmail address (inbox, runs list) were left out.
