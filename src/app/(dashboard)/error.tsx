@@ -18,7 +18,7 @@ export default function DashboardError({ error, retry }: { error: unknown; retry
   const signedOut = /not authenticated/i.test(message);
 
   return (
-    <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-lg border border-dashed p-8 text-center">
+    <div className="mx-auto flex max-w-md flex-col items-center gap-3 glass rounded-xl border-dashed p-8 text-center">
       <p className="font-medium">{signedOut ? "Your session has expired" : "Something went wrong"}</p>
       <p className="text-sm text-muted-foreground">
         {signedOut

@@ -95,8 +95,8 @@ function MessageBubble({ message }: { message: Doc<"emailMessages"> }) {
   return (
     <li
       className={cn(
-        "flex max-w-[85%] flex-col gap-2 rounded-xl border p-4 text-sm shadow-xs",
-        outbound ? "self-end border-primary/20 bg-primary/5" : "self-start bg-card",
+        "flex max-w-[85%] flex-col gap-2 glass rounded-xl p-4 text-sm",
+        outbound ? "self-end border-primary/20 bg-primary/5" : "self-start",
       )}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -145,7 +145,7 @@ function ReplyForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-xs">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3 glass glass-hover rounded-xl p-4">
       <Textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}

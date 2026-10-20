@@ -49,7 +49,7 @@ export function GmailConnection() {
   if (status === undefined) return <Skeleton className="h-14" />;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3 text-sm shadow-xs">
+    <div className="flex flex-wrap items-center gap-3 glass rounded-xl p-3 text-sm">
       <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
         <MailIcon className="size-4" />
       </span>

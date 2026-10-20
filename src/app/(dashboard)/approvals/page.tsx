@@ -31,7 +31,7 @@ export default function ApprovalsPage() {
         title="Approvals"
         description="Everything the agent proposes waits here. Nothing is sent or created until you approve it."
         actions={
-          <div className="flex rounded-lg border bg-card p-0.5 text-sm shadow-xs" role="tablist">
+          <div className="flex glass rounded-lg p-0.5 text-sm" role="tablist">
             {(["pending", "decided"] as const).map((t) => (
               <button
                 key={t}

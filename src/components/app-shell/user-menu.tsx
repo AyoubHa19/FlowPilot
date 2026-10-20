@@ -2,9 +2,8 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
-import { ChevronsUpDownIcon, LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
+import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import { api } from "../../../convex/_generated/api";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,6 @@ export function UserMenu() {
   const viewer = useQuery(api.users.viewer);
   const { signOut } = useAuthActions();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
   const email = viewer?.email ?? "";
 
   return (
@@ -47,21 +45,6 @@ export function UserMenu() {
             <span className="truncate">{email}</span>
             {viewer?.role === "demo" && <Badge variant="warning">Demo</Badge>}
           </DropdownMenuLabel>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs text-muted-foreground">Theme</DropdownMenuLabel>
-          {[
-            { value: "light", label: "Light", icon: SunIcon },
-            { value: "dark", label: "Dark", icon: MoonIcon },
-            { value: "system", label: "System", icon: MonitorIcon },
-          ].map((option) => (
-            <DropdownMenuItem key={option.value} onClick={() => setTheme(option.value)}>
-              <option.icon />
-              {option.label}
-              {theme === option.value && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
-            </DropdownMenuItem>
-          ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => void signOut().then(() => router.push("/signin"))}>

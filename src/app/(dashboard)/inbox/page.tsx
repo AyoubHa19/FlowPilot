@@ -60,7 +60,7 @@ export default function InboxPage() {
           Send an email to the connected inbox, or use “Simulate email”.
         </EmptyState>
       ) : (
-        <ul className="flex flex-col divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+        <ul className="flex flex-col divide-y overflow-hidden glass rounded-xl">
           {results.map((thread) => {
             const unread = thread.status === "open" || thread.status === "needs_human";
             const who = thread.counterpartName ?? thread.counterpartEmail;

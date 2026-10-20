@@ -129,7 +129,7 @@ export default function RunsPage() {
 
 function Stat({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="rounded-lg border p-3">
+    <div className="glass glass-hover rounded-xl p-3">
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="text-lg font-semibold tabular-nums">{value}</dd>
       <dd className="text-xs text-muted-foreground">{hint}</dd>

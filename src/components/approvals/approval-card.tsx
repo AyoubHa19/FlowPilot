@@ -107,7 +107,7 @@ export function ApprovalCard({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border bg-card p-4 text-sm shadow-xs",
+        "flex flex-col gap-3 glass rounded-xl p-4 text-sm",
         emergency && approval.status === "pending" && "border-destructive/50 ring-2 ring-destructive/15",
       )}
     >

@@ -100,7 +100,7 @@ export default function RunPage() {
         <span className="text-muted-foreground">{run.summary}</span>
       </div>
 
-      <dl className="grid grid-cols-2 gap-3 rounded-lg border p-3 text-sm sm:grid-cols-5">
+      <dl className="glass grid grid-cols-2 gap-3 rounded-xl p-3 text-sm sm:grid-cols-5">
         <Stat label="Elapsed" value={seconds((run.finishedAt ?? now) - run.startedAt)} />
         <Stat label="Tool calls" value={`${run.toolCalls} / 8`} />
         <Stat label="Tokens" value={`${run.tokensIn.toLocaleString()} / ${run.tokensOut.toLocaleString()}`} />
@@ -185,7 +185,7 @@ function TimelineStep({ step, start, now }: { step: Step; start: number; now: nu
           )}
         />
       </span>
-      <details className="rounded-lg border px-3 py-2 text-sm" open={running && step.type === "approval"}>
+      <details className="glass rounded-xl px-3 py-2 text-sm" open={running && step.type === "approval"}>
         <summary className="flex cursor-pointer flex-wrap items-center gap-2">
           <TypeIcon className="size-4 text-muted-foreground" />
           <span className="font-medium">{label}</span>

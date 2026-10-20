@@ -5,6 +5,7 @@ import {
 } from "@convex-dev/auth/nextjs/server";
 
 const isSignInPage = createRouteMatcher(["/signin"]);
+const isPublicPage = createRouteMatcher(["/", "/signin"]);
 
 // Optimistic redirects only. The real access check lives in every Convex
 // query and mutation (requireUserId), not here.
@@ -12,9 +13,9 @@ export const proxy = convexAuthNextjsMiddleware(
   async (request, { convexAuth }) => {
     const authed = await convexAuth.isAuthenticated();
     if (isSignInPage(request) && authed) {
-      return nextjsMiddlewareRedirect(request, "/");
+      return nextjsMiddlewareRedirect(request, "/home");
     }
-    if (!isSignInPage(request) && !authed) {
+    if (!isPublicPage(request) && !authed) {
       return nextjsMiddlewareRedirect(request, "/signin");
     }
   },

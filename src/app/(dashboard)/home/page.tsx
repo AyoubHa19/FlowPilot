@@ -165,9 +165,9 @@ function Kpi({
   const body = (
     <div
       className={cn(
-        "flex h-full flex-col gap-2 rounded-xl border bg-card p-4 shadow-xs transition-colors",
+        "glass glass-hover flex h-full flex-col gap-2 rounded-xl p-4",
         href && "hover:border-primary/40",
-        highlight && "border-primary/40 bg-secondary/50",
+        highlight && "border-primary/40",
       )}
     >
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -203,7 +203,7 @@ function Section({
   className?: string;
 }) {
   return (
-    <section className={cn("flex flex-col rounded-xl border bg-card shadow-xs", className)}>
+    <section className={cn("flex flex-col glass rounded-xl", className)}>
       <div className="flex items-center justify-between border-b px-4 py-3">
         <h2 className="text-sm font-semibold">{title}</h2>
         <Link href={href} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">

@@ -14,7 +14,7 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed p-8 text-center">
+    <div className="glass rounded-xl border-dashed p-8 text-center">
       <p className="font-medium">{title}</p>
       {children && (
         <div className="mt-1 text-sm text-muted-foreground">{children}</div>

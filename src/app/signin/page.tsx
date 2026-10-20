@@ -2,12 +2,13 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { ConvexError } from "convex/values";
-import { BotIcon, FileSearchIcon, ShieldCheckIcon, SparklesIcon } from "lucide-react";
+import { BotIcon, FileSearchIcon, ShieldCheckIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Logo, LogoMark } from "@/components/app-shell/logo";
+import { Logo } from "@/components/app-shell/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,46 +79,44 @@ export default function SignInPage() {
   }
 
   return (
-    <main className="grid flex-1 lg:grid-cols-2">
-      <section className="relative hidden overflow-hidden bg-gradient-to-br from-[oklch(0.33_0.13_274)] via-[oklch(0.4_0.17_280)] to-[oklch(0.45_0.16_300)] p-10 text-white lg:flex lg:flex-col">
-        <div className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-[oklch(0.7_0.15_200)]/20 blur-3xl" />
-        <div className="relative flex items-center gap-2.5">
-          <LogoMark className="bg-white/15 from-white/20 to-white/5" />
-          <span className="font-semibold tracking-tight">FlowPilot AI</span>
+    <main className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-12 px-4 py-10 sm:px-6 lg:grid-cols-[1.1fr_1fr]">
+      <section className="hidden flex-col gap-10 lg:flex">
+        <Link href="/" className="w-fit">
+          <Logo />
+        </Link>
+        <div className="flex flex-col gap-5">
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="rounded-md border border-white/70 px-1.5 py-0.5 text-[11px] font-bold tracking-wider text-white">
+              AI
+            </span>
+            Email agent for property managers
+          </p>
+          <h1 className="text-5xl leading-[1.05] font-bold tracking-tight text-white">
+            Tenant email, researched and drafted. You make the call.
+          </h1>
         </div>
-        <div className="relative mt-auto flex max-w-md flex-col gap-8">
-          <div>
-            <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium">
-              <SparklesIcon className="size-3.5" /> Email agent for property managers
-            </p>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              Tenant email, researched and drafted. You make the call.
-            </h1>
-          </div>
-          <ul className="flex flex-col gap-5">
-            {FEATURES.map((f) => (
-              <li key={f.title} className="flex gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
-                  <f.icon className="size-4.5" />
-                </span>
-                <span>
-                  <span className="block font-medium">{f.title}</span>
-                  <span className="block text-sm text-white/75">{f.text}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ul className="flex flex-col gap-5">
+          {FEATURES.map((f) => (
+            <li key={f.title} className="flex gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                <f.icon className="size-4.5" />
+              </span>
+              <span>
+                <span className="block font-medium text-white">{f.title}</span>
+                <span className="block text-sm text-muted-foreground">{f.text}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      <section className="flex items-center justify-center p-6">
-        <div className="flex w-full max-w-sm flex-col gap-6">
-          <div className="lg:hidden">
+      <section className="flex justify-center">
+        <div className="glass flex w-full max-w-md flex-col gap-6 rounded-3xl p-6 sm:p-8">
+          <Link href="/" className="w-fit lg:hidden">
             <Logo />
-          </div>
+          </Link>
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight text-white">
               {flow === "signIn" ? "Welcome back" : "Create your account"}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -126,12 +125,12 @@ export default function SignInPage() {
           </div>
 
           {DEMO_EMAIL && DEMO_PASSWORD && flow === "signIn" && (
-            <div className="flex flex-col gap-2 rounded-xl border bg-secondary/60 p-4 text-sm">
+            <div className="flex flex-col gap-2 rounded-2xl border bg-white/5 p-4 text-sm">
               <p className="font-medium">Just looking around?</p>
               <p className="text-muted-foreground">
                 The demo account sees everything and can try the agent on simulated email.
               </p>
-              <Button variant="outline" disabled={pending} onClick={() => void submit(DEMO_EMAIL, DEMO_PASSWORD, "signIn")}>
+              <Button variant="outline" className="rounded-full" disabled={pending} onClick={() => void submit(DEMO_EMAIL, DEMO_PASSWORD, "signIn")}>
                 Try the demo
               </Button>
             </div>
@@ -152,7 +151,7 @@ export default function SignInPage() {
                 required
               />
             </div>
-            <Button type="submit" disabled={pending} size="lg">
+            <Button type="submit" disabled={pending} size="lg" className="h-11 rounded-full bg-white font-semibold text-black hover:bg-white/90">
               {pending ? "One moment…" : flow === "signIn" ? "Sign in" : "Create account"}
             </Button>
             <Button type="button" variant="link" onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}>
