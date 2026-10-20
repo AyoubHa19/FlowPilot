@@ -21,8 +21,10 @@ for (const filename of files) {
   const args = [cli, "run", "documentsNode:importFromAdmin", JSON.stringify({ filename, base64 })];
   if (prod) args.push("--prod");
   const out = execFileSync(process.execPath, args, { encoding: "utf8" }).trim();
-  if (out === "null") skipped += 1;
-  else added += 1;
+  // A new document id is printed as a quoted string; a skipped lease returns
+  // null, which the CLI prints as nothing.
+  if (/^"[a-z0-9]+"$/.test(out)) added += 1;
+  else skipped += 1;
   process.stdout.write(`\r${added + skipped}/${files.length} (${added} added, ${skipped} already there)`);
 }
 process.stdout.write("\n");
