@@ -14,9 +14,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
 import { ApprovalCard } from "@/components/approvals/approval-card";
+import { PageHeader } from "@/components/page-header";
 import { NotFound } from "@/components/states";
+import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { retryNotice } from "@/lib/agent-status";
 import { humanize } from "@/lib/format";
 import { formatDateTime, useNow } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -62,31 +65,33 @@ export default function RunPage() {
 
   return (
     <>
-      <div>
-        {thread && (
-          <Link href={`/inbox/${thread._id}`} className="text-sm text-muted-foreground hover:text-foreground">
-            ← {thread.subject}
-          </Link>
-        )}
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold">Agent run</h1>
-          <Badge variant={run.status === "failed" ? "destructive" : "secondary"}>
-            {active && <LoaderIcon className="animate-spin" />}
-            {humanize(run.status)}
-          </Badge>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {email && `From ${email.from} · received ${formatDateTime(email.receivedAt)}`}
-          {tenant && (
-            <>
-              {" · tenant "}
-              <Link href={`/tenants/${tenant._id}`} className="underline-offset-4 hover:underline">
-                {tenant.name}
-              </Link>
-            </>
-          )}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={
+          thread && (
+            <Link href={`/inbox/${thread._id}`} className="hover:text-foreground">
+              ← {thread.subject}
+            </Link>
+          )
+        }
+        title={
+          <span className="flex flex-wrap items-center gap-2">
+            Agent run <StatusBadge status={run.status} />
+          </span>
+        }
+        description={
+          <>
+            {email && `From ${email.from} · received ${formatDateTime(email.receivedAt)}`}
+            {tenant && (
+              <>
+                {" · tenant "}
+                <Link href={`/tenants/${tenant._id}`} className="underline-offset-4 hover:underline">
+                  {tenant.name}
+                </Link>
+              </>
+            )}
+          </>
+        }
+      />
 
       <div className="flex flex-wrap gap-2 text-sm">
         {run.category && <Badge variant="secondary">{humanize(run.category)}</Badge>}
@@ -106,6 +111,12 @@ export default function RunPage() {
       {run.escalationReason && (
         <p className="rounded-md border border-amber-500/40 p-3 text-sm">
           Escalated to a person: {run.escalationReason}
+        </p>
+      )}
+      {retryNotice(active, steps) && (
+        <p className="flex items-start gap-2 rounded-md border p-3 text-sm text-muted-foreground">
+          <LoaderIcon className="mt-0.5 size-4 shrink-0 animate-spin" />
+          {retryNotice(active, steps)}
         </p>
       )}
       {run.error && <p className="text-sm text-destructive">Error: {run.error}</p>}

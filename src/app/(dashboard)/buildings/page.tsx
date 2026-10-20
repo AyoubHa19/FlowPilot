@@ -3,6 +3,7 @@
 import { usePaginatedQuery } from "convex/react";
 import Link from "next/link";
 import { api } from "../../../../convex/_generated/api";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState, TableSkeleton } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +26,7 @@ export default function BuildingsPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold">Buildings</h1>
+      <PageHeader title="Buildings" description="Every building under management, with its units and tenants." />
       {status === "LoadingFirstPage" ? (
         <TableSkeleton />
       ) : results.length === 0 ? (

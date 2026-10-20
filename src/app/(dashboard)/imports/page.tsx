@@ -4,6 +4,7 @@ import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { ImportJobCard } from "@/components/imports/import-job-card";
 import { ImportUpload } from "@/components/imports/import-upload";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState, TableSkeleton } from "@/components/states";
 import { Button } from "@/components/ui/button";
 
@@ -18,7 +19,10 @@ export default function ImportsPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold">Imports</h1>
+      <PageHeader
+        title="Imports"
+        description="Bulk-load buildings, units, tenants and leases from CSV, processed in the background."
+      />
       <ImportUpload />
 
       <h2 className="text-lg font-medium">Import jobs</h2>

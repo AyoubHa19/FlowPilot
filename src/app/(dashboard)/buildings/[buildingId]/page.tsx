@@ -4,6 +4,7 @@ import { usePaginatedQuery, useQuery } from "convex/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "../../../../../convex/_generated/api";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState, NotFound, TableSkeleton } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,22 +35,19 @@ export default function BuildingDetailPage() {
 
   return (
     <>
-      <div>
-        <Link
-          href="/buildings"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Buildings
-        </Link>
-        {building === undefined ? (
-          <Skeleton className="mt-2 h-14 w-72" />
-        ) : (
-          <>
-            <h1 className="mt-1 text-2xl font-semibold">{building.name}</h1>
-            <p className="text-muted-foreground">{building.address}</p>
-          </>
-        )}
-      </div>
+      {building === undefined ? (
+        <Skeleton className="h-16 w-72" />
+      ) : (
+        <PageHeader
+          eyebrow={
+            <Link href="/buildings" className="hover:text-foreground">
+              ← Buildings
+            </Link>
+          }
+          title={building.name}
+          description={`${building.address} · ${building.city}`}
+        />
+      )}
 
       <h2 className="text-lg font-medium">Units</h2>
       {units.status === "LoadingFirstPage" ? (

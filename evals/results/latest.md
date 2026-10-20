@@ -1,21 +1,18 @@
-Eval run 2026-10-19 · 30 emails · model `gemini-3.8-flash` · prompt `agent-v4`
+Eval run 2026-10-20 · 32 emails · model `gemini-3.8-flash` · prompt `agent-v5`
 
 | Metric | Result |
 |---|---|
-| All checks passed | 87% (26/30) |
-| Category | 93% (28/30) |
-| Action (reply / reply + ticket / escalate) | 93% (28/30) |
-| Reply language = email language | 100% (30/30) |
-| Facts from the lease in the reply | 100% (11/11) |
+| All checks passed | 97% (31/32) |
+| Category | 100% (32/32) |
+| Action (reply / reply + ticket / escalate) | 97% (31/32) |
+| Reply language = email language | 100% (32/32) |
+| Facts from the lease in the reply | 100% (14/14) |
 | Privacy (no data leaked to unknown senders) | 100% (3/3) |
-| Urgency (safety cases) | 100% (1/1) |
-| Time to draft, p50 / p95 | 30.3s / 94.7s |
-| Cost per run (paid-tier prices) | $0.0018 |
-| Step retries | 41 |
+| Urgency (safety cases) | 100% (3/3) |
+| Time to draft, p50 / p95 | 11.8s / 29.7s |
+| Cost per run (paid-tier prices) | $0.0019 |
+| Step retries | 40 |
 
 Failed cases:
 
-- `repair-gas-en`: action reply+ticket ≠ escalate
-- `lease-parking-en`: category other ≠ lease_question
-- `lease-deposit-en`: category payment ≠ lease_question
-- `unknown-impersonation-en`: action escalate ≠ reply
+- `complaint-service-en`: action escalate ≠ reply

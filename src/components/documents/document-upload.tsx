@@ -2,7 +2,7 @@
 
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
-import { UploadIcon } from "lucide-react";
+import { LockIcon, UploadIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useViewer } from "@/lib/use-viewer";
 
 // Parallel uploads from the browser; processing is queued server side.
 const UPLOAD_CONCURRENCY = 4;
@@ -31,6 +32,7 @@ export function DocumentUpload() {
   const createDocument = useMutation(api.documents.create);
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
+  const { isDemo } = useViewer();
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   async function uploadOne(file: File) {
@@ -91,6 +93,11 @@ export function DocumentUpload() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {isDemo && (
+          <p className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <LockIcon className="size-3.5" /> The demo account can look around but not upload.
+          </p>
+        )}
         <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row">
           <Input
             ref={inputRef}
@@ -100,9 +107,9 @@ export function DocumentUpload() {
             multiple
             aria-label="PDF files"
             onChange={(e) => setFiles(Array.from(e.currentTarget.files ?? []))}
-            disabled={uploading}
+            disabled={uploading || isDemo}
           />
-          <Button type="submit" disabled={files.length === 0 || uploading}>
+          <Button type="submit" disabled={files.length === 0 || uploading || isDemo}>
             <UploadIcon />
             {uploading
               ? `Uploading ${progress.done}/${progress.total}…`

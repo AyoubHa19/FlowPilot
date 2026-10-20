@@ -7,6 +7,8 @@ import type { ReactNode } from "react";
 import { api } from "../../../../../convex/_generated/api";
 import type { Doc } from "../../../../../convex/_generated/dataModel";
 import { TenantDocuments } from "@/components/documents/tenant-documents";
+import { InitialsAvatar } from "@/components/initials-avatar";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState, NotFound } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -43,17 +45,22 @@ export default function TenantDetailPage() {
 
   return (
     <>
-      <div>
-        {building && (
-          <Link
-            href={`/buildings/${building._id}`}
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← {building.name}
-          </Link>
-        )}
-        <h1 className="mt-1 text-2xl font-semibold">{tenant.name}</h1>
-      </div>
+      <PageHeader
+        eyebrow={
+          building && (
+            <Link href={`/buildings/${building._id}`} className="hover:text-foreground">
+              ← {building.name}
+            </Link>
+          )
+        }
+        title={
+          <span className="flex items-center gap-3">
+            <InitialsAvatar name={tenant.name} className="size-10 text-sm" />
+            {tenant.name}
+          </span>
+        }
+        description={unit ? `Unit ${unit.label} · ${tenant.email}` : tenant.email}
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

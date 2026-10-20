@@ -4,6 +4,7 @@ import { usePaginatedQuery } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../../convex/_generated/api";
 import { ApprovalCard } from "@/components/approvals/approval-card";
+import { PageHeader } from "@/components/page-header";
 import { EmptyState, TableSkeleton } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,27 +27,29 @@ export default function ApprovalsPage() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="mr-auto text-2xl font-semibold">Approvals</h1>
-        <div className="flex rounded-lg border p-0.5 text-sm">
-          {(["pending", "decided"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              className={cn(
-                "rounded-md px-3 py-1 transition-colors",
-                tab === t ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t === "pending" ? "Pending" : "Decided"}
-            </button>
-          ))}
-        </div>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Everything the agent proposes waits here. Nothing is sent or created until you approve it.
-      </p>
+      <PageHeader
+        title="Approvals"
+        description="Everything the agent proposes waits here. Nothing is sent or created until you approve it."
+        actions={
+          <div className="flex rounded-lg border bg-card p-0.5 text-sm shadow-xs" role="tablist">
+            {(["pending", "decided"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="tab"
+                aria-selected={tab === t}
+                onClick={() => setTab(t)}
+                className={cn(
+                  "rounded-md px-3 py-1 transition-colors",
+                  tab === t ? "bg-secondary font-medium text-secondary-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {t === "pending" ? "Pending" : "Decided"}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {list.status === "LoadingFirstPage" ? (
         <TableSkeleton rows={4} />

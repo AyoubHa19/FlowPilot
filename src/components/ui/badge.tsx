@@ -18,6 +18,12 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // FlowPilot status colors (tokens in globals.css).
+        success: "bg-success-soft text-success",
+        warning: "bg-warning-soft text-warning",
+        info: "bg-info-soft text-info",
+        danger: "bg-danger-soft text-destructive",
+        neutral: "bg-muted text-muted-foreground",
       },
     },
     defaultVariants: {

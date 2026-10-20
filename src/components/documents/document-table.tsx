@@ -12,6 +12,7 @@ import { EmptyState, TableSkeleton } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useViewer } from "@/lib/use-viewer";
 import {
   Table,
   TableBody,
@@ -117,6 +118,7 @@ export function DocumentTable() {
 function LinkTenantForm({ documentId }: { documentId: Id<"documents"> }) {
   const linkTenant = useMutation(api.documents.linkTenant);
   const [pending, setPending] = useState(false);
+  const { isDemo } = useViewer();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -141,9 +143,9 @@ function LinkTenantForm({ documentId }: { documentId: Id<"documents"> }) {
         placeholder="Tenant email"
         aria-label="Tenant email to link"
         className="h-7 w-44 text-xs"
-        disabled={pending}
+        disabled={pending || isDemo}
       />
-      <Button type="submit" size="icon-sm" variant="ghost" disabled={pending} aria-label="Link tenant">
+      <Button type="submit" size="icon-sm" variant="ghost" disabled={pending || isDemo} aria-label="Link tenant">
         <LinkIcon />
       </Button>
     </form>

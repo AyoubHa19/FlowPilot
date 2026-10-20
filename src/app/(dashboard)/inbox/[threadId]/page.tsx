@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
-import { SendIcon } from "lucide-react";
+import { LockIcon, SendIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -10,13 +10,17 @@ import { toast } from "sonner";
 import { api } from "../../../../../convex/_generated/api";
 import type { Doc, Id } from "../../../../../convex/_generated/dataModel";
 import { AgentRunCard } from "@/components/inbox/agent-run-card";
+import { InitialsAvatar } from "@/components/initials-avatar";
+import { PageHeader } from "@/components/page-header";
 import { NotFound } from "@/components/states";
+import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/time";
+import { DEMO_HINT, useViewer } from "@/lib/use-viewer";
 
 export default function ThreadPage() {
   const { threadId } = useParams<{ threadId: string }>();
@@ -38,23 +42,32 @@ export default function ThreadPage() {
   const { thread, messages, tenant } = detail;
   return (
     <>
-      <div>
-        <Link href="/inbox" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Inbox
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold break-words">{thread.subject}</h1>
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span>{thread.counterpartName ? `${thread.counterpartName} · ` : ""}{thread.counterpartEmail}</span>
-          {tenant ? (
-            <Link href={`/tenants/${tenant._id}`}>
-              <Badge variant="secondary">Tenant: {tenant.name}</Badge>
-            </Link>
-          ) : (
-            <Badge variant="outline">Unknown sender</Badge>
-          )}
-          {thread.simulated && <Badge variant="outline">Simulated</Badge>}
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={
+          <Link href="/inbox" className="hover:text-foreground">
+            ← Inbox
+          </Link>
+        }
+        title={thread.subject}
+        description={
+          <span className="mt-1 flex flex-wrap items-center gap-2">
+            <InitialsAvatar name={thread.counterpartName ?? thread.counterpartEmail} className="size-6 text-[0.6rem]" />
+            <span>
+              {thread.counterpartName ? `${thread.counterpartName} · ` : ""}
+              {thread.counterpartEmail}
+            </span>
+            {tenant ? (
+              <Link href={`/tenants/${tenant._id}`}>
+                <Badge variant="info">Tenant: {tenant.name}</Badge>
+              </Link>
+            ) : (
+              <Badge variant="warning">Unknown sender</Badge>
+            )}
+            {thread.simulated && <Badge variant="neutral">Simulated</Badge>}
+            <StatusBadge status={thread.status} />
+          </span>
+        }
+      />
 
       <ol className="flex flex-col gap-3">
         {messages.map((message) => (
@@ -82,8 +95,8 @@ function MessageBubble({ message }: { message: Doc<"emailMessages"> }) {
   return (
     <li
       className={cn(
-        "flex max-w-[85%] flex-col gap-2 rounded-lg border p-3 text-sm",
-        outbound ? "self-end bg-muted/60" : "self-start",
+        "flex max-w-[85%] flex-col gap-2 rounded-xl border p-4 text-sm shadow-xs",
+        outbound ? "self-end border-primary/20 bg-primary/5" : "self-start bg-card",
       )}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -112,6 +125,8 @@ function ReplyForm({
   initialBody: string;
 }) {
   const queueReply = useMutation(api.inbox.queueReply);
+  const { isDemo } = useViewer();
+  const locked = isDemo && !simulated;
   const [body, setBody] = useState(initialBody);
   const [pending, setPending] = useState(false);
 
@@ -130,22 +145,26 @@ function ReplyForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-2 rounded-lg border p-3">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-xs">
       <Textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Write a reply…"
         aria-label="Reply"
         rows={4}
-        disabled={pending}
+        disabled={pending || locked}
       />
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
-          {simulated
+          {locked ? (
+            <span className="inline-flex items-center gap-1.5">
+              <LockIcon className="size-3.5" /> {DEMO_HINT}
+            </span>
+          ) : simulated
             ? "Simulated conversation: the reply is saved, not emailed."
             : "Sent from the connected Gmail inbox, in the same thread."}
         </p>
-        <Button type="submit" size="sm" disabled={pending || body.trim() === ""}>
+        <Button type="submit" size="sm" disabled={pending || locked || body.trim() === ""}>
           <SendIcon />
           {pending ? "Sending…" : "Send reply"}
         </Button>

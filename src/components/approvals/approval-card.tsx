@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { humanize } from "@/lib/format";
 import { formatDateTime } from "@/lib/time";
+import { DEMO_HINT, useViewer } from "@/lib/use-viewer";
+import { cn } from "@/lib/utils";
 
 export type ApprovalWithContext = FunctionReturnType<typeof api.approvals.forRun>[number];
 
@@ -32,15 +34,17 @@ function statusBadge(approval: ApprovalWithContext) {
   const edited = approval.editedPayload !== undefined;
   switch (approval.status) {
     case "pending":
-      return <Badge variant="secondary">Waiting for you</Badge>;
+      return <Badge variant="warning">Waiting for you</Badge>;
     case "approved":
-      return <Badge variant="outline">Approved · running…</Badge>;
+      return <Badge variant="info">Approved · running…</Badge>;
     case "executed":
-      return <Badge variant="outline">{edited ? "Edited & approved" : "Approved"} · done</Badge>;
+      return <Badge variant="success">{edited ? "Edited & approved" : "Approved"} · done</Badge>;
     case "rejected":
-      return <Badge variant="destructive">Rejected</Badge>;
+      return <Badge variant="neutral">Rejected</Badge>;
     case "failed":
-      return <Badge variant="destructive">Failed</Badge>;
+      return <Badge variant="danger">Failed</Badge>;
+    case "eval":
+      return <Badge variant="neutral">Eval only · never executed</Badge>;
   }
 }
 
@@ -57,6 +61,10 @@ export function ApprovalCard({
   const reject = useMutation(api.approvals.reject);
   const [mode, setMode] = useState<"view" | "edit" | "reject">("view");
   const [pending, setPending] = useState(false);
+  const { isDemo } = useViewer();
+  // The server enforces this too; here it only explains the disabled buttons.
+  const locked = isDemo && approval.thread?.simulated === false;
+  const emergency = approval.run?.escalationReason?.startsWith("Safety emergency");
 
   const isReply = approval.action === "send_reply";
   const shown = (approval.editedPayload ?? approval.payload) as Reply & Ticket;
@@ -97,11 +105,19 @@ export function ApprovalCard({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border p-3 text-sm">
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-xl border bg-card p-4 text-sm shadow-xs",
+        emergency && approval.status === "pending" && "border-destructive/50 ring-2 ring-destructive/15",
+      )}
+    >
       <div className="flex flex-wrap items-center gap-2">
-        {isReply ? <MailIcon className="size-4" /> : <TicketIcon className="size-4" />}
+        <span className="flex size-7 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+          {isReply ? <MailIcon className="size-3.5" /> : <TicketIcon className="size-3.5" />}
+        </span>
         <span className="font-medium">{isReply ? "Send reply" : "Create ticket"}</span>
         {statusBadge(approval)}
+        {emergency && <Badge variant="danger">Emergency · a person was alerted</Badge>}
         {showContext && approval.thread && (
           <Link
             href={`/inbox/${approval.thread._id}`}
@@ -210,10 +226,10 @@ export function ApprovalCard({
       )}
 
       {approval.status === "pending" && mode === "view" && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
-            disabled={pending}
+            disabled={pending || locked}
             onClick={() =>
               void run(
                 () => approve({ approvalId: approval._id }),
@@ -224,14 +240,15 @@ export function ApprovalCard({
             <CheckIcon />
             Approve
           </Button>
-          <Button size="sm" variant="outline" disabled={pending} onClick={() => setMode("edit")}>
+          <Button size="sm" variant="outline" disabled={pending || locked} onClick={() => setMode("edit")}>
             <PencilIcon />
             Edit
           </Button>
-          <Button size="sm" variant="ghost" disabled={pending} onClick={() => setMode("reject")}>
+          <Button size="sm" variant="ghost" disabled={pending || locked} onClick={() => setMode("reject")}>
             <XIcon />
             Reject
           </Button>
+          {locked && <span className="text-xs text-muted-foreground">{DEMO_HINT}</span>}
         </div>
       )}
 

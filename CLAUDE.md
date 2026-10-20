@@ -25,8 +25,8 @@ back on in Stage 7.
   768 dims) → `docChunks` with a vector index filtered by `tenantId`.
   50 PDFs process in ~40s; search is tenant-scoped.
 - **Stage 4: Email in and out — done.** Gmail OAuth via Convex HTTP actions
-  (test inbox bnaybir1@gmail.com, Google Cloud project `dacc-512019`, Testing
-  mode), encrypted tokens, minute cron sync on the history API, dedupe by
+  (a dedicated test Gmail inbox, Google OAuth app in Testing mode), encrypted
+  tokens, minute cron sync on the history API, dedupe by
   gmailMessageId, tenant linking, replies in the same Gmail thread, and a
   simulate-email form for demos.
 - **Stage 5: Agent engine — done.** Every new inbound email starts a durable
@@ -97,7 +97,17 @@ npx convex run seed:run   # idempotent demo data (dev deployment)
 npm run generate:import-csv -- --rows 10000 --broken 3   # test CSV in samples/
 npm run generate:lease-pdfs -- --count 50               # lease PDFs in samples/leases/
 npx convex run documents:reindex   # re-chunk + re-embed all documents
+npm run eval                       # 30-case eval on dev (real Gemini), updates README table
+npm run eval -- --only <id,id>     # a few cases, no README update
+npx convex run evals:cancelBatch '{"batchId":"b…"}'   # stop an aborted eval
 ```
+
+Evals: cases in `evals/emails.json`, scoring in `evals/score.ts` (unit tested),
+runner `scripts/run-evals.ts`. Eval threads have `eval: true` (hidden from the
+inbox) and eval runs `mode: "eval"` (stop after the draft; proposals get status
+"eval", never pending). Don't edit `convex/` while an eval runs: the dev
+watcher deploys immediately. After a prompt change, bump `PROMPT_VERSION` and
+rerun the eval.
 
 Secrets on the Convex dev deployment: `GOOGLE_GENERATIVE_AI_API_KEY` (Gemini),
 `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` (Gmail OAuth client),

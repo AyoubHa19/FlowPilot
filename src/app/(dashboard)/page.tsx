@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function DashboardHome() {
-  redirect("/inbox");
+export default function DashboardRoot() {
+  redirect("/home");
 }

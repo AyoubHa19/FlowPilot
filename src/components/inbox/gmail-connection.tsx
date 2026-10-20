@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { timeAgo, useNow } from "@/lib/time";
+import { useViewer } from "@/lib/use-viewer";
 
 /** Gmail connection status, connect / reconnect, and a manual sync. */
 export function GmailConnection() {
@@ -17,6 +18,7 @@ export function GmailConnection() {
   const syncNow = useAction(api.gmail.syncNow);
   const [busy, setBusy] = useState<"connect" | "sync" | null>(null);
   const now = useNow();
+  const { isDemo } = useViewer();
 
   async function connect() {
     setBusy("connect");
@@ -47,14 +49,16 @@ export function GmailConnection() {
   if (status === undefined) return <Skeleton className="h-14" />;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border p-3 text-sm">
-      <MailIcon className="size-4 text-muted-foreground" />
+    <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3 text-sm shadow-xs">
+      <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <MailIcon className="size-4" />
+      </span>
       {status === null ? (
         <span className="text-muted-foreground">Gmail is not connected. Use “Simulate email” for demos.</span>
       ) : (
         <>
           <span className="font-medium">{status.email}</span>
-          <Badge variant={status.status === "connected" ? "outline" : "destructive"}>
+          <Badge variant={status.status === "connected" ? "success" : "danger"}>
             {status.status === "connected" ? "Connected" : "Needs reconnect"}
           </Badge>
           <span className="text-muted-foreground">
@@ -72,7 +76,7 @@ export function GmailConnection() {
             Sync now
           </Button>
         )}
-        {status?.status !== "connected" && (
+        {status?.status !== "connected" && !isDemo && (
           <Button size="sm" disabled={busy !== null} onClick={() => void connect()}>
             {status === null ? "Connect Gmail" : "Reconnect Gmail"}
           </Button>

@@ -2,7 +2,7 @@
 
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
-import { DownloadIcon, UploadIcon } from "lucide-react";
+import { DownloadIcon, LockIcon, UploadIcon } from "lucide-react";
 import Papa from "papaparse";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { downloadFile } from "@/lib/download";
+import { useViewer } from "@/lib/use-viewer";
 
 const TEMPLATE_ROW = {
   building_name: "Lindenhof",
@@ -47,6 +48,7 @@ export function ImportUpload() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [pending, setPending] = useState(false);
+  const { isDemo } = useViewer();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -92,6 +94,11 @@ export function ImportUpload() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {isDemo && (
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <LockIcon className="size-3.5" /> The demo account can look around but not upload.
+          </p>
+        )}
         <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row">
           <Input
             ref={inputRef}
@@ -100,9 +107,9 @@ export function ImportUpload() {
             accept=".csv,text/csv"
             aria-label="CSV file"
             onChange={(e) => setFile(e.currentTarget.files?.[0] ?? null)}
-            disabled={pending}
+            disabled={pending || isDemo}
           />
-          <Button type="submit" disabled={!file || pending}>
+          <Button type="submit" disabled={!file || pending || isDemo}>
             <UploadIcon />
             {pending ? "Uploading…" : "Upload and import"}
           </Button>

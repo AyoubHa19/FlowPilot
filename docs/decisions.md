@@ -229,3 +229,44 @@ One short entry per technical choice, newest last.
 - **Verified live with Gmail:** approve sent the agent's reply into the
   sender's thread, reject sent nothing; edit-then-approve sent the edited text
   on a simulated thread and in the unit tests.
+
+## Stage 7 — Quality, security and design
+
+- **An eval set of 32 real-looking emails** (`evals/emails.json`) runs through
+  the real workflow in an eval mode: the run stops after the draft, proposals
+  get status `eval`, and nothing is sent or created. A scorer checks category,
+  action (reply / escalate / ignore), language, required facts, privacy (no
+  other tenant's data) and urgency. The runner writes the results table into
+  the README, so the numbers there are always the last full run.
+- **Waves of 3, not 32 at once.** Starting all cases together filled the
+  workflow pool (43 steps in 16 minutes) and made every case slow. The runner
+  starts small waves, and the workflow pool runs 5 steps in parallel instead
+  of 2. A batch can be cancelled.
+- **The gas case exposed a prompt contradiction**, not a model limit. The
+  prompt said "escalate dangerous issues" and "escalation ends the run without
+  a draft", so the tenant got no safety steps. Prompt v5 adds a non-terminal
+  `flag_emergency` tool: it alerts a person (the thread goes to "Needs a
+  person"), then the agent still drafts the safety steps, the emergency
+  hotline and "call 112". `escalate_to_human` stays terminal for legal threats
+  and money disputes. Flooding and electrical cases were added to the set.
+- **Eval result v4 → v5: 87% → 97% of cases pass every check** (31/32), with
+  100% on category, language, facts, privacy and urgency. The one failure
+  (an angry service complaint escalated instead of answered) is kept strict
+  on purpose. About $0.002 per email on Gemini paid-tier prices.
+- **Sign-up is closed by default in production.** `ALLOWED_SIGNUP_EMAILS`
+  is checked in the Password provider's `profile()` hook, server side.
+- **Two roles: owner and demo.** `OWNER_EMAILS` decides; anyone else is a demo
+  user who can see everything but only act on simulated email. Uploads,
+  imports, Gmail connect, replies and approvals on real mail call
+  `requireOwner`. The UI hides or locks the same controls, but the server
+  check is the guarantee. With `OWNER_EMAILS` unset everyone is an owner, so
+  local development is unchanged.
+- **A leaked dev password was rotated, not just deleted.** The old one is
+  still in git history, so `admin:resetPassword` changed it and ended its
+  sessions. Passwords live only in `.env.local` and Convex env vars.
+- **Design system.** One indigo brand color, semantic tones
+  (success / warning / info / danger) as CSS tokens with a full dark theme,
+  and one `StatusBadge` that maps every status in the app to a tone, so the
+  same state looks the same everywhere. A sidebar shell (sheet on mobile),
+  a shared `PageHeader`, an overview page with the numbers a manager cares
+  about, and a split-screen sign-in with an optional "Try the demo" button.

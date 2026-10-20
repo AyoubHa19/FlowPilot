@@ -7,6 +7,7 @@ import Link from "next/link";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { ApprovalCard } from "@/components/approvals/approval-card";
+import { retryNotice } from "@/lib/agent-status";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,6 +81,12 @@ export function AgentRunCard({
               <p className="flex items-start gap-2 rounded-md border border-amber-500/40 p-2">
                 <CircleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
                 Escalated to a person: {run.escalationReason}
+              </p>
+            )}
+            {retryNotice(running, steps) && (
+              <p className="flex items-start gap-2 rounded-md border p-2 text-muted-foreground">
+                <LoaderIcon className="mt-0.5 size-4 shrink-0 animate-spin" />
+                {retryNotice(running, steps)}
               </p>
             )}
             {run.error && <p className="text-destructive">Error: {run.error}</p>}
