@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { humanize } from "@/lib/format";
+import { humanize, urgencyLabel } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type RunData = NonNullable<FunctionReturnType<typeof api.agent.runForThread>>;
@@ -70,7 +70,7 @@ export function AgentRunCard({
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{humanize(run.category)}</Badge>
                 <Badge variant={run.urgency === "urgent" || run.urgency === "high" ? "destructive" : "outline"}>
-                  {humanize(run.urgency ?? "")} urgency
+                  {urgencyLabel(run.urgency ?? "")}
                 </Badge>
                 <Badge variant="outline">{run.language}</Badge>
                 <span className="text-muted-foreground">{run.summary}</span>

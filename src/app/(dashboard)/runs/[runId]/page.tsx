@@ -20,7 +20,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { retryNotice } from "@/lib/agent-status";
-import { humanize } from "@/lib/format";
+import { humanize, urgencyLabel } from "@/lib/format";
 import { formatDateTime, useNow } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
@@ -95,7 +95,7 @@ export default function RunPage() {
 
       <div className="flex flex-wrap gap-2 text-sm">
         {run.category && <Badge variant="secondary">{humanize(run.category)}</Badge>}
-        {run.urgency && <Badge variant="outline">{humanize(run.urgency)} urgency</Badge>}
+        {run.urgency && <Badge variant="outline">{urgencyLabel(run.urgency)}</Badge>}
         {run.language && <Badge variant="outline">{run.language}</Badge>}
         <span className="text-muted-foreground">{run.summary}</span>
       </div>

@@ -20,3 +20,8 @@ export function humanize(value: string) {
   const text = value.replaceAll("_", " ");
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/** "Urgent" on its own; "High urgency", "Low urgency" otherwise. */
+export function urgencyLabel(urgency: string) {
+  return urgency === "urgent" ? "Urgent" : `${humanize(urgency)} urgency`;
+}

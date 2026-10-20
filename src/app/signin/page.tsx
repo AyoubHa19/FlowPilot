@@ -1,11 +1,12 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
 import { ConvexError } from "convex/values";
 import { BotIcon, FileSearchIcon, ShieldCheckIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Logo } from "@/components/app-shell/logo";
@@ -48,6 +49,14 @@ export default function SignInPage() {
   const router = useRouter();
   const [flow, setFlow] = useState<Flow>("signIn");
   const [pending, setPending] = useState(false);
+  const { isAuthenticated } = useConvexAuth();
+
+  // Leave only once the client holds the session. Navigating right after
+  // signIn() resolved could reach the dashboard before the client was
+  // authenticated, and its guard sent the user back here (a second click).
+  useEffect(() => {
+    if (isAuthenticated) router.replace("/home");
+  }, [isAuthenticated, router]);
 
   async function submit(email: string, password: string, mode: Flow) {
     const parsed = credentialsSchema.safeParse({ email, password });
@@ -58,8 +67,9 @@ export default function SignInPage() {
     setPending(true);
     try {
       await signIn("password", { ...parsed.data, flow: mode });
-      router.push("/home");
+      // Stay "pending" until the effect above navigates.
     } catch (error) {
+      setPending(false);
       toast.error(
         error instanceof ConvexError
           ? String(error.data)
@@ -67,8 +77,6 @@ export default function SignInPage() {
             ? "Wrong email or password"
             : "Could not create the account",
       );
-    } finally {
-      setPending(false);
     }
   }
 
