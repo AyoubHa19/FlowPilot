@@ -134,14 +134,13 @@ export function ScenarioStory() {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
-      <div className="hidden lg:block">
-        <div className="sticky top-[calc(50vh-120px)]">
-          <EmailPanel scenario={SCENARIOS[active]!} active={active} onTab={goTo} />
-        </div>
+    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+      {/* Phones: pinned under the header. Desktop: pinned beside the canvases. */}
+      <div className="sticky top-[72px] z-20 self-start lg:top-[calc(50vh-120px)]">
+        <EmailPanel scenario={SCENARIOS[active]!} active={active} onTab={goTo} />
       </div>
 
-      <div className="flex flex-col gap-8 lg:gap-0">
+      <div className="flex flex-col gap-10 lg:gap-0">
         {SCENARIOS.map((scenario, i) => (
           <div
             key={scenario.tab}
@@ -149,11 +148,8 @@ export function ScenarioStory() {
               blocks.current[i] = el;
             }}
             data-index={i}
-            className="flex flex-col gap-4 lg:min-h-[85vh] lg:justify-center"
+            className="lg:flex lg:min-h-[85vh] lg:flex-col lg:justify-center"
           >
-            <div className="lg:hidden">
-              <EmailPanel scenario={scenario} active={i} onTab={() => undefined} single />
-            </div>
             <Canvas scenario={scenario} revealed={revealed.has(i)} />
           </div>
         ))}
@@ -166,51 +162,58 @@ function EmailPanel({
   scenario,
   active,
   onTab,
-  single = false,
 }: {
   scenario: Scenario;
   active: number;
   onTab: (index: number) => void;
-  single?: boolean;
 }) {
   const { typed, done } = useTypewriter(scenario.body, true, 16);
+  const tabs = useRef<HTMLDivElement>(null);
+
+  // On phones the tabs scroll sideways; keep the active one in view.
+  useEffect(() => {
+    const row = tabs.current;
+    const tab = row?.children[active] as HTMLElement | undefined;
+    if (row && tab && row.scrollWidth > row.clientWidth) {
+      row.scrollTo({ left: tab.offsetLeft - 8, behavior: "smooth" });
+    }
+  }, [active]);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111115]/90 shadow-2xl backdrop-blur-xl">
-      {!single && (
-        <div className="flex flex-wrap gap-1 border-b border-white/8 p-2" role="tablist" aria-label="Kinds of email">
-          {SCENARIOS.map((s, i) => (
-            <button
-              key={s.tab}
-              type="button"
-              role="tab"
-              aria-selected={i === active}
-              onClick={() => onTab(i)}
-              className={cn(
-                "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                i === active ? "bg-primary text-primary-foreground" : "text-white/60 hover:text-white",
-              )}
-            >
-              {s.tab}
-            </button>
-          ))}
-        </div>
-      )}
-      <div className="flex flex-col gap-3 p-4">
-        {single && (
-          <span className="w-fit rounded-md bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
-            {scenario.tab}
-          </span>
-        )}
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111115]/95 shadow-2xl backdrop-blur-xl">
+      <div
+        ref={tabs}
+        className="flex gap-1 overflow-x-auto border-b border-white/8 p-2 [scrollbar-width:none] lg:flex-wrap [&::-webkit-scrollbar]:hidden"
+        role="tablist"
+        aria-label="Kinds of email"
+      >
+        {SCENARIOS.map((s, i) => (
+          <button
+            key={s.tab}
+            type="button"
+            role="tab"
+            aria-selected={i === active}
+            onClick={() => onTab(i)}
+            className={cn(
+              "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+              i === active ? "bg-primary text-primary-foreground" : "text-white/60 hover:text-white",
+            )}
+          >
+            {s.tab}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-col gap-2 p-3 lg:gap-3 lg:p-4">
         <div className="flex items-center gap-2 text-xs text-white/50">
           <span className="flex size-6 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white/80">
             {scenario.from.slice(0, 1).toUpperCase()}
           </span>
           <span className="truncate">{scenario.from}</span>
+          <span className="truncate font-medium text-white lg:hidden">· {scenario.subject}</span>
         </div>
-        <p className="font-medium text-white">{scenario.subject}</p>
+        <p className="hidden font-medium text-white lg:block">{scenario.subject}</p>
         <div className="flex items-end gap-3">
-          <p className="min-h-[4.5rem] flex-1 text-sm leading-relaxed text-white/75">
+          <p className="line-clamp-3 min-h-[3.75rem] flex-1 text-[13px] leading-relaxed text-white/75 lg:line-clamp-none lg:min-h-[4.5rem] lg:text-sm">
             {typed}
             {!done && <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-primary" />}
           </p>
@@ -276,10 +279,27 @@ function Canvas({ scenario, revealed }: { scenario: Scenario; revealed: boolean 
         ))}
       </div>
 
-      {/* Phones: the same steps as a list. */}
-      <ol className="grid gap-3 p-4 sm:grid-cols-2 lg:hidden">
+      {/* Phones: the same steps top to bottom, joined by a rail that fills in. */}
+      <ol className="relative flex flex-col gap-4 py-5 pr-4 pl-10 lg:hidden">
+        <span className="absolute top-8 bottom-8 left-[19px] w-px bg-white/10" aria-hidden="true" />
+        <span
+          className="absolute top-8 bottom-8 left-[19px] w-px origin-top bg-primary/70 transition-transform ease-linear"
+          style={{
+            transform: `scaleY(${revealed ? 1 : 0})`,
+            transitionDuration: `${scenario.nodes.length * STEP_MS}ms`,
+          }}
+          aria-hidden="true"
+        />
         {scenario.nodes.map((node, i) => (
-          <li key={node.id}>
+          <li key={node.id} className="relative">
+            <span
+              className={cn(
+                "absolute top-5 -left-[25px] size-2.5 rounded-full bg-primary ring-4 ring-[#0c0c10] transition-opacity duration-300",
+                revealed ? "opacity-100" : "opacity-0",
+              )}
+              style={{ transitionDelay: `${i * STEP_MS}ms` }}
+              aria-hidden="true"
+            />
             <NodeCard node={node} revealed={revealed} delay={i * STEP_MS} />
           </li>
         ))}
