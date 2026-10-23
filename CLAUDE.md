@@ -17,8 +17,8 @@ print them).
 - Stages 0–6 — done: property data, CSV import (Workpool), lease PDFs with
   tenant-scoped vector search, Gmail in/out, the durable agent workflow,
   approvals with awaitEvent and the live run timeline.
-- **Stage 7 — done except the deploy.** 32-case eval (97% pass, prompt
-  `agent-v5`), safety emergencies (`flag_emergency` + safety draft), sign-up
+- **Stage 7 — done except the deploy.** 32-case eval (100% pass, prompt
+  `agent-v6`), safety emergencies (`flag_emergency` + safety draft), sign-up
   allowlist and owner/demo roles (`requireOwner`), dark-only glass design with
   the mouse-revealed glyph background (`components/cursor-field.tsx`), the
   FlowPilot identity (envelope-and-flight-path logo, signal lime, Instrument

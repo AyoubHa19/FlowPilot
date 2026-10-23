@@ -1,0 +1,91 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Geist"; src: url("assets/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Geist Mono"; src: url("assets/fonts/GeistMono.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+
+#root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #f4f5f8; font-family: "Geist", sans-serif; }
+.f05-emergency-bg { position: absolute; inset: 0; background: #0b0b0f; }
+.f05-emergency-kicker { font-family: "Geist Mono", monospace; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: #a1a4ae; }
+.f05-emergency-display { font-family: "Instrument Serif", serif; font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; color: #f4f5f8; }
+.f05-emergency-lime { color: #c8f135; }
+.f05-emergency-italic { font-style: italic; }
+.f05-emergency-card { background: #141419; border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9); }
+.f05-emergency-chip { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 20px; font-size: 24px; font-weight: 600; }
+.f05-emergency-chip-lime { background: #c8f135; color: #15170b; }
+.f05-emergency-tag { display: inline-block; border-radius: 8px; padding: 4px 10px; font-family: "Geist Mono", monospace; font-size: 16px; letter-spacing: 0.1em; font-weight: 500; }
+.f05-emergency-caret { display: inline-block; width: 3px; height: 1em; margin-left: 3px; vertical-align: -0.12em; background: #c8f135; }
+
+
+.f05-emergency-mail { position: absolute; left: 120px; top: 170px; width: 640px; padding: 36px 40px; }
+.f05-emergency-from { font-size: 24px; color: #a1a4ae; }
+.f05-emergency-sub { margin-top: 18px; font-size: 40px; font-weight: 600; }
+.f05-emergency-body { margin-top: 14px; font-size: 26px; color: #c7c9d1; line-height: 1.45; }
+.f05-emergency-alert { position: absolute; left: 1000px; top: 170px; width: 720px; padding: 30px 36px; border-color: rgba(248,113,113,0.55); }
+.f05-emergency-red { background: #ef4444; color: #fff; }
+.f05-emergency-glow { position: absolute; left: 960px; top: 120px; width: 800px; height: 300px; border-radius: 40px; background: radial-gradient(closest-side, rgba(239,68,68,0.35), transparent); }
+.f05-emergency-atitle { margin-top: 16px; font-size: 40px; font-weight: 600; }
+.f05-emergency-person { margin-top: 20px; }
+.f05-emergency-reply { position: absolute; left: 1000px; top: 520px; width: 720px; padding: 30px 36px; }
+.f05-emergency-rh { font-size: 22px; color: #a1a4ae; }
+.f05-emergency-rt { margin-top: 14px; font-size: 28px; line-height: 1.5; color: #f4f5f8; min-height: 130px; }
+.f05-emergency-wire { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+
+  </style>
+  <div id="root" data-composition-id="05-emergency" data-width="1920" data-height="1080" data-duration="8.5">
+    <div id="f05-emergency-clip1" class="clip f05-emergency-bg" data-start="0" data-duration="8.5" data-track-index="0"></div>
+
+    <div class="clip f05-emergency-glow" id="f05-emergency-glow" data-start="0" data-duration="8.5" data-track-index="1"></div>
+    <div id="f05-emergency-clip2" class="clip" data-start="0" data-duration="8.5" data-track-index="2">
+      <svg class="f05-emergency-wire" viewBox="0 0 1920 1080"><path id="f05-emergency-w" d="M760 260 C 880 260, 880 260, 1000 260" pathLength="1" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="1" stroke-dashoffset="1"/></svg>
+    </div>
+    <div class="clip f05-emergency-card f05-emergency-mail" id="f05-emergency-mail" data-start="0" data-duration="8.5" data-track-index="3">
+      <div class="f05-emergency-from">Jonas Becker · 06:02</div>
+      <div class="f05-emergency-sub">Gasgeruch im Treppenhaus!</div>
+      <div class="f05-emergency-body">Im Treppenhaus riecht es stark nach Gas. Was sollen wir tun?</div>
+    </div>
+    <div class="clip f05-emergency-card f05-emergency-alert" id="f05-emergency-alert" data-start="0" data-duration="8.5" data-track-index="4">
+      <span class="f05-emergency-tag f05-emergency-red">ALERT · GAS</span>
+      <div class="f05-emergency-atitle">Safety emergency</div>
+      <div class="f05-emergency-person" id="f05-emergency-person"><span class="f05-emergency-chip f05-emergency-chip-lime">A person is alerted now</span></div>
+    </div>
+    <div class="clip f05-emergency-card f05-emergency-reply" id="f05-emergency-reply" data-start="0" data-duration="8.5" data-track-index="5">
+      <div class="f05-emergency-rh">Safety reply · German · waits for approval</div>
+      <div class="f05-emergency-rt"><span id="f05-emergency-text"></span><span class="f05-emergency-caret" id="f05-emergency-caret"></span></div>
+    </div>
+  </div>
+  <script>
+    (() => {
+
+function typeOn(tl, el, text, at, dur, caret) {
+  const state = { n: 0 };
+  el.textContent = "";
+  tl.to(state, {
+    n: text.length, duration: dur, ease: "none",
+    onUpdate() { el.textContent = text.slice(0, Math.round(state.n)); },
+  }, at);
+  if (caret) {
+    tl.fromTo(caret, { opacity: 0 }, { opacity: 1, duration: 0.01 }, at);
+    tl.to(caret, { opacity: 0, duration: 0.2 }, at + dur + 0.3);
+  }
+}
+
+      const $ = (s) => document.querySelector('[data-composition-id="05-emergency"] ' + s);
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo("#f05-emergency-mail", { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, 0.1);
+      tl.to("#f05-emergency-w", { attr: { "stroke-dashoffset": 0 }, duration: 0.5, ease: "power2.inOut" }, 1.3);
+      tl.fromTo("#f05-emergency-alert", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.8)" }, 1.6);
+      tl.fromTo("#f05-emergency-glow", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 1.7);
+      tl.to("#f05-emergency-glow", { opacity: 0.35, duration: 1.0, ease: "power2.inOut" }, 2.2);
+      tl.fromTo("#f05-emergency-person", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 3.0);
+      tl.fromTo("#f05-emergency-reply", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 4.4);
+      typeOn(tl, $("#f05-emergency-text"), 'Verlassen Sie sofort das Haus · Keine Schalter betätigen · Notruf 112 · Notdienst +49 30 5550 9999', 4.8, 1.9, $("#f05-emergency-caret"));
+
+      window.__timelines["05-emergency"] = tl;
+    })();
+  </script>
+</template>

@@ -294,3 +294,25 @@ One short entry per technical choice, newest last.
   run down a rail that fills in.
 - **Screenshots on the landing page are demo data only.** Pages that showed the
   real Gmail address (inbox, runs list) were left out.
+
+## Stage 7 — Deploy and the last eval case
+
+- **Prompt v6: complaints get a reply, not a hand-over.** The one failing eval
+  case was a tenant upset that three emails about parking went unanswered; the
+  agent escalated with no draft. "Escalate when you are unsure" was being read as
+  "escalate when the tenant is upset". v6 narrows it to "when you cannot tell what
+  the sender is asking for" and adds a complaint rule: apologise, restate the
+  issue, say what happens next, promise no date or outcome. Full eval: 32/32
+  (was 31/32), every check at 100%.
+- **Free-tier latency is visible in the numbers.** The same run's median time to
+  draft rose from 11.8s to 15.3s (p95 48s) with 42 step retries: Gemini's free
+  tier rate-limits a batch of parallel runs, and the workflow retries with
+  backoff until each run finishes. Single emails are faster; the landing page
+  says ~15s, the measured median.
+- **Production setup without the dashboard.** Prod data comes from the same
+  idempotent seed, and lease PDFs go up through an internal action
+  (`npm run upload:leases -- --prod`) that only the deploy key can call. It
+  skips a lease the tenant already has, so it is safe to rerun.
+- **Link previews.** A static Open Graph / Twitter card (`src/app/opengraph-image.png`,
+  built from `docs/og/og.html` with headless Chrome) and `metadataBase`, so the
+  link shows the product when shared on LinkedIn.

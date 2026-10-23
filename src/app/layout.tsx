@@ -25,9 +25,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description =
+  "An AI email agent for property managers: it reads each tenant email, finds the tenant and the lease, and drafts the reply. Nothing is sent until you approve it.";
+
 export const metadata: Metadata = {
+  // Absolute base for the Open Graph / Twitter images (src/app/opengraph-image.png).
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://flow-pilot-rose.vercel.app"),
   title: { default: "FlowPilot AI", template: "%s · FlowPilot AI" },
-  description: "An email agent for property managers that drafts replies and waits for a human to approve.",
+  description,
+  openGraph: {
+    type: "website",
+    siteName: "FlowPilot",
+    title: "FlowPilot · Tenant email, drafted before you open it",
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FlowPilot · Tenant email, drafted before you open it",
+    description,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

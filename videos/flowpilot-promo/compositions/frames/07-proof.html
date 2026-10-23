@@ -1,0 +1,65 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Geist"; src: url("assets/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Geist Mono"; src: url("assets/fonts/GeistMono.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+
+#root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #f4f5f8; font-family: "Geist", sans-serif; }
+.f07-proof-bg { position: absolute; inset: 0; background: #0b0b0f; }
+.f07-proof-kicker { font-family: "Geist Mono", monospace; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: #a1a4ae; }
+.f07-proof-display { font-family: "Instrument Serif", serif; font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; color: #f4f5f8; }
+.f07-proof-lime { color: #c8f135; }
+.f07-proof-italic { font-style: italic; }
+.f07-proof-card { background: #141419; border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9); }
+.f07-proof-chip { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 20px; font-size: 24px; font-weight: 600; }
+.f07-proof-chip-lime { background: #c8f135; color: #15170b; }
+.f07-proof-tag { display: inline-block; border-radius: 8px; padding: 4px 10px; font-family: "Geist Mono", monospace; font-size: 16px; letter-spacing: 0.1em; font-weight: 500; }
+.f07-proof-caret { display: inline-block; width: 3px; height: 1em; margin-left: 3px; vertical-align: -0.12em; background: #c8f135; }
+
+
+.f07-proof-row { position: absolute; left: 120px; right: 120px; top: 270px; display: flex; }
+.f07-proof-stat { flex: 1; padding: 0 40px; border-left: 1px solid rgba(255,255,255,0.12); }
+.f07-proof-stat:first-child { border-left: none; }
+.f07-proof-num { font-size: 190px; color: #f4f5f8; font-variant-numeric: tabular-nums; }
+.f07-proof-lab { margin-top: 24px; font-size: 30px; color: #a1a4ae; line-height: 1.4; }
+.f07-proof-k { position: absolute; left: 160px; top: 160px; }
+
+  </style>
+  <div id="root" data-composition-id="07-proof" data-width="1920" data-height="1080" data-duration="6.5">
+    <div id="f07-proof-clip1" class="clip f07-proof-bg" data-start="0" data-duration="6.5" data-track-index="0"></div>
+
+    <div class="clip f07-proof-kicker f07-proof-k" id="f07-proof-k" data-start="0" data-duration="6.5" data-track-index="1">Measured on 32 real-looking tenant emails</div>
+    <div id="f07-proof-clip2" class="clip f07-proof-row" data-start="0" data-duration="6.5" data-track-index="2"><div class="f07-proof-stat" id="f07-proof-sa"><div class="f07-proof-display f07-proof-num"><span class="f07-proof-lime"></span><span id="f07-proof-va">0</span><span class="f07-proof-lime">%</span></div><div class="f07-proof-lab">of 32 test emails pass every check</div></div><div class="f07-proof-stat" id="f07-proof-sb"><div class="f07-proof-display f07-proof-num"><span class="f07-proof-lime">$</span><span id="f07-proof-vb">0</span><span class="f07-proof-lime"></span></div><div class="f07-proof-lab">per email, Gemini paid-tier prices</div></div><div class="f07-proof-stat" id="f07-proof-sc"><div class="f07-proof-display f07-proof-num"><span class="f07-proof-lime">~</span><span id="f07-proof-vc">0</span><span class="f07-proof-lime">s</span></div><div class="f07-proof-lab">from email in to draft ready</div></div></div>
+  </div>
+  <script>
+    (() => {
+
+function typeOn(tl, el, text, at, dur, caret) {
+  const state = { n: 0 };
+  el.textContent = "";
+  tl.to(state, {
+    n: text.length, duration: dur, ease: "none",
+    onUpdate() { el.textContent = text.slice(0, Math.round(state.n)); },
+  }, at);
+  if (caret) {
+    tl.fromTo(caret, { opacity: 0 }, { opacity: 1, duration: 0.01 }, at);
+    tl.to(caret, { opacity: 0, duration: 0.2 }, at + dur + 0.3);
+  }
+}
+
+      const $ = (s) => document.querySelector('[data-composition-id="07-proof"] ' + s);
+      const tl = gsap.timeline({ paused: true });
+tl.fromTo("#f07-proof-k", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0);
+      tl.fromTo("#f07-proof-sa", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+      (() => { const el = $("#f07-proof-va"); const st = { v: 0 }; tl.to(st, { v: 100, duration: 1.2, ease: "power3.out", onUpdate() { el.textContent = st.v.toFixed(0); } }, 0.2); })();
+      tl.fromTo("#f07-proof-sb", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 1.8);
+      (() => { const el = $("#f07-proof-vb"); const st = { v: 0 }; tl.to(st, { v: 0.002, duration: 1.2, ease: "power3.out", onUpdate() { el.textContent = st.v.toFixed(3); } }, 1.8); })();
+      tl.fromTo("#f07-proof-sc", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 3.4);
+      (() => { const el = $("#f07-proof-vc"); const st = { v: 0 }; tl.to(st, { v: 15, duration: 1.2, ease: "power3.out", onUpdate() { el.textContent = st.v.toFixed(0); } }, 3.4); })();
+      window.__timelines["07-proof"] = tl;
+    })();
+  </script>
+</template>

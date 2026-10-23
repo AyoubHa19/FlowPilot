@@ -1,0 +1,70 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Geist"; src: url("assets/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Geist Mono"; src: url("assets/fonts/GeistMono.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+
+#root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #f4f5f8; font-family: "Geist", sans-serif; }
+.f04-draft-bg { position: absolute; inset: 0; background: #0b0b0f; }
+.f04-draft-kicker { font-family: "Geist Mono", monospace; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: #a1a4ae; }
+.f04-draft-display { font-family: "Instrument Serif", serif; font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; color: #f4f5f8; }
+.f04-draft-lime { color: #c8f135; }
+.f04-draft-italic { font-style: italic; }
+.f04-draft-card { background: #141419; border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9); }
+.f04-draft-chip { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 20px; font-size: 24px; font-weight: 600; }
+.f04-draft-chip-lime { background: #c8f135; color: #15170b; }
+.f04-draft-tag { display: inline-block; border-radius: 8px; padding: 4px 10px; font-family: "Geist Mono", monospace; font-size: 16px; letter-spacing: 0.1em; font-weight: 500; }
+.f04-draft-caret { display: inline-block; width: 3px; height: 1em; margin-left: 3px; vertical-align: -0.12em; background: #c8f135; }
+
+
+.f04-draft-screen { position: absolute; left: 700px; top: 150px; width: 1120px; border-radius: 22px; overflow: hidden; border: 1px solid rgba(255,255,255,0.14); box-shadow: 0 60px 120px -40px rgba(0,0,0,0.95); }
+.f04-draft-screen img { display: block; width: 100%; height: auto; }
+.f04-draft-back { position: absolute; left: 1240px; top: 70px; width: 620px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,0.10); opacity: 0.55; }
+.f04-draft-back img { display: block; width: 100%; height: auto; }
+.f04-draft-copy { position: absolute; left: 110px; top: 230px; width: 560px; }
+.f04-draft-h { font-size: 120px; }
+.f04-draft-chiprow { margin-top: 40px; }
+
+  </style>
+  <div id="root" data-composition-id="04-draft" data-width="1920" data-height="1080" data-duration="7">
+    <div id="f04-draft-clip1" class="clip f04-draft-bg" data-start="0" data-duration="7" data-track-index="0"></div>
+
+    <div class="clip f04-draft-back" id="f04-draft-back" data-start="0" data-duration="7" data-track-index="1"><img src="assets/run-timeline.jpg" alt="" /></div>
+    <div class="clip f04-draft-screen" id="f04-draft-screen" data-start="0" data-duration="7" data-track-index="2"><img src="assets/draft.jpg" alt="" /></div>
+    <div id="f04-draft-clip2" class="clip f04-draft-copy" data-start="0" data-duration="7" data-track-index="3">
+      <div class="f04-draft-display f04-draft-h" id="f04-draft-h">In their <span class="f04-draft-lime f04-draft-italic">language.</span></div>
+      <div class="f04-draft-chiprow" id="f04-draft-chip"><span class="f04-draft-chip f04-draft-chip-lime">Draft ready in ~15s</span></div>
+    </div>
+  </div>
+  <script>
+    (() => {
+
+function typeOn(tl, el, text, at, dur, caret) {
+  const state = { n: 0 };
+  el.textContent = "";
+  tl.to(state, {
+    n: text.length, duration: dur, ease: "none",
+    onUpdate() { el.textContent = text.slice(0, Math.round(state.n)); },
+  }, at);
+  if (caret) {
+    tl.fromTo(caret, { opacity: 0 }, { opacity: 1, duration: 0.01 }, at);
+    tl.to(caret, { opacity: 0, duration: 0.2 }, at + dur + 0.3);
+  }
+}
+
+      const $ = (s) => document.querySelector('[data-composition-id="04-draft"] ' + s);
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo("#f04-draft-screen", { opacity: 0, y: 140 }, { opacity: 1, y: 0, duration: 1.4, ease: "power3.out" }, 0.1);
+      tl.fromTo("#f04-draft-screen", { scale: 1 }, { scale: 1.06, duration: 6.8, ease: "none" }, 0.1);
+      tl.fromTo("#f04-draft-back", { opacity: 0, x: 120, rotation: 6 }, { opacity: 0.55, x: 0, rotation: 4, duration: 1.2, ease: "power3.out" }, 1.6);
+      tl.fromTo("#f04-draft-h", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1.0, ease: "power3.out" }, 3.4);
+      tl.fromTo("#f04-draft-chip", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2)" }, 5.2);
+
+      window.__timelines["04-draft"] = tl;
+    })();
+  </script>
+</template>

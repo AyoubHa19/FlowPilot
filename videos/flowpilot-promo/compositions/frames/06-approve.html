@@ -1,0 +1,78 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Geist"; src: url("assets/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Geist Mono"; src: url("assets/fonts/GeistMono.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+
+#root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #f4f5f8; font-family: "Geist", sans-serif; }
+.f06-approve-bg { position: absolute; inset: 0; background: #0b0b0f; }
+.f06-approve-kicker { font-family: "Geist Mono", monospace; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: #a1a4ae; }
+.f06-approve-display { font-family: "Instrument Serif", serif; font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; color: #f4f5f8; }
+.f06-approve-lime { color: #c8f135; }
+.f06-approve-italic { font-style: italic; }
+.f06-approve-card { background: #141419; border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9); }
+.f06-approve-chip { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 20px; font-size: 24px; font-weight: 600; }
+.f06-approve-chip-lime { background: #c8f135; color: #15170b; }
+.f06-approve-tag { display: inline-block; border-radius: 8px; padding: 4px 10px; font-family: "Geist Mono", monospace; font-size: 16px; letter-spacing: 0.1em; font-weight: 500; }
+.f06-approve-caret { display: inline-block; width: 3px; height: 1em; margin-left: 3px; vertical-align: -0.12em; background: #c8f135; }
+
+
+.f06-approve-head { position: absolute; left: 0; right: 0; top: 120px; text-align: center; font-size: 104px; }
+.f06-approve-card { position: absolute; left: 50%; top: 400px; width: 980px; margin-left: -490px; padding: 36px 44px; }
+.f06-approve-line { height: 18px; border-radius: 9px; background: rgba(255,255,255,0.10); margin-top: 16px; }
+.f06-approve-row { display: flex; gap: 18px; margin-top: 34px; align-items: center; }
+.f06-approve-btn { border-radius: 999px; padding: 16px 30px; font-size: 26px; font-weight: 600; border: 1px solid rgba(255,255,255,0.14); color: #f4f5f8; }
+.f06-approve-approve { background: #c8f135; color: #15170b; border-color: transparent; }
+.f06-approve-sent { margin-left: auto; }
+.f06-approve-meta { display: flex; justify-content: space-between; font-size: 22px; color: #a1a4ae; }
+
+  </style>
+  <div id="root" data-composition-id="06-approve" data-width="1920" data-height="1080" data-duration="6.5">
+    <div id="f06-approve-clip1" class="clip f06-approve-bg" data-start="0" data-duration="6.5" data-track-index="0"></div>
+
+    <div class="clip f06-approve-display f06-approve-head" id="f06-approve-head" data-start="0" data-duration="6.5" data-track-index="1">Nothing is sent <span class="f06-approve-lime f06-approve-italic">until you approve.</span></div>
+    <div class="clip f06-approve-card" id="f06-approve-card" data-start="0" data-duration="6.5" data-track-index="2">
+      <div class="f06-approve-meta"><span>Send reply · Re: Wasserhahn in der Küche tropft</span><span>Waiting for you</span></div>
+      <div class="f06-approve-line" style="width:92%"></div>
+      <div class="f06-approve-line" style="width:78%"></div>
+      <div class="f06-approve-line" style="width:85%"></div>
+      <div class="f06-approve-row">
+        <span class="f06-approve-btn f06-approve-approve" id="f06-approve-approve">✓ Approve</span>
+        <span class="f06-approve-btn">Edit</span>
+        <span class="f06-approve-btn">Reject</span>
+        <span class="f06-approve-sent" id="f06-approve-sent"><span class="f06-approve-chip f06-approve-chip-lime">✓ Sent</span></span>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+
+function typeOn(tl, el, text, at, dur, caret) {
+  const state = { n: 0 };
+  el.textContent = "";
+  tl.to(state, {
+    n: text.length, duration: dur, ease: "none",
+    onUpdate() { el.textContent = text.slice(0, Math.round(state.n)); },
+  }, at);
+  if (caret) {
+    tl.fromTo(caret, { opacity: 0 }, { opacity: 1, duration: 0.01 }, at);
+    tl.to(caret, { opacity: 0, duration: 0.2 }, at + dur + 0.3);
+  }
+}
+
+      const $ = (s) => document.querySelector('[data-composition-id="06-approve"] ' + s);
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo("#f06-approve-head", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 1.0, ease: "power3.out" }, 0.1);
+      tl.fromTo("#f06-approve-card", { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, 1.4);
+      tl.to("#f06-approve-approve", { scale: 0.9, duration: 0.15, ease: "power2.in" }, 2.8);
+      tl.to("#f06-approve-approve", { scale: 1, duration: 0.35, ease: "back.out(3)" }, 2.95);
+      tl.fromTo("#f06-approve-sent", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 3.6);
+
+      window.__timelines["06-approve"] = tl;
+    })();
+  </script>
+</template>

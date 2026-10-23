@@ -1,0 +1,72 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Geist"; src: url("assets/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Geist Mono"; src: url("assets/fonts/GeistMono.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+
+#root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #f4f5f8; font-family: "Geist", sans-serif; }
+.f02-email-bg { position: absolute; inset: 0; background: #0b0b0f; }
+.f02-email-kicker { font-family: "Geist Mono", monospace; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: #a1a4ae; }
+.f02-email-display { font-family: "Instrument Serif", serif; font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; color: #f4f5f8; }
+.f02-email-lime { color: #c8f135; }
+.f02-email-italic { font-style: italic; }
+.f02-email-card { background: #141419; border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9); }
+.f02-email-chip { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 20px; font-size: 24px; font-weight: 600; }
+.f02-email-chip-lime { background: #c8f135; color: #15170b; }
+.f02-email-tag { display: inline-block; border-radius: 8px; padding: 4px 10px; font-family: "Geist Mono", monospace; font-size: 16px; letter-spacing: 0.1em; font-weight: 500; }
+.f02-email-caret { display: inline-block; width: 3px; height: 1em; margin-left: 3px; vertical-align: -0.12em; background: #c8f135; }
+
+
+.f02-email-col { position: absolute; left: 50%; top: 170px; width: 1060px; margin-left: -530px; }
+.f02-email-card { position: relative; margin-top: 34px; padding: 44px 48px; }
+.f02-email-from { display: flex; align-items: center; gap: 18px; font-size: 26px; color: #a1a4ae; }
+.f02-email-av { width: 56px; height: 56px; border-radius: 50%; background: #2a2a45; color: #c9cdfa; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 22px; }
+.f02-email-subject { margin-top: 26px; font-size: 44px; font-weight: 600; color: #f4f5f8; letter-spacing: -0.01em; }
+.f02-email-body { margin-top: 20px; font-size: 32px; line-height: 1.5; color: #c7c9d1; min-height: 150px; }
+.f02-email-status { position: absolute; top: -26px; right: 36px; }
+
+  </style>
+  <div id="root" data-composition-id="02-email" data-width="1920" data-height="1080" data-duration="6.5">
+    <div id="f02-email-clip1" class="clip f02-email-bg" data-start="0" data-duration="6.5" data-track-index="0"></div>
+
+    <div id="f02-email-clip2" class="clip f02-email-col" data-start="0" data-duration="6.5" data-track-index="1">
+      <div class="f02-email-kicker" id="f02-email-kicker">Inbox · 1 new</div>
+      <div class="f02-email-card" id="f02-email-card">
+        <div class="f02-email-from"><span class="f02-email-av">AS</span><span>Anna Schneider · Lindenhof 2.04</span></div>
+        <div class="f02-email-subject">Wasserhahn in der Küche tropft</div>
+        <div class="f02-email-body"><span id="f02-email-text"></span><span class="f02-email-caret" id="f02-email-caret"></span></div>
+        <div class="f02-email-status" id="f02-email-status"><span class="f02-email-chip f02-email-chip-lime">● Agent run started</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+
+function typeOn(tl, el, text, at, dur, caret) {
+  const state = { n: 0 };
+  el.textContent = "";
+  tl.to(state, {
+    n: text.length, duration: dur, ease: "none",
+    onUpdate() { el.textContent = text.slice(0, Math.round(state.n)); },
+  }, at);
+  if (caret) {
+    tl.fromTo(caret, { opacity: 0 }, { opacity: 1, duration: 0.01 }, at);
+    tl.to(caret, { opacity: 0, duration: 0.2 }, at + dur + 0.3);
+  }
+}
+
+      const $ = (s) => document.querySelector('[data-composition-id="02-email"] ' + s);
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo("#f02-email-kicker", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+      tl.fromTo("#f02-email-card", { opacity: 0, y: 90 }, { opacity: 1, y: 0, duration: 1.0, ease: "power3.out" }, 0.9);
+      typeOn(tl, $("#f02-email-text"), 'Hallo, der Wasserhahn in meiner Küche tropft seit drei Tagen und es wird immer schlimmer. Könnte bitte jemand vorbeikommen?', 2.0, 2.4, $("#f02-email-caret"));
+      tl.fromTo("#f02-email-status", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2)" }, 4.7);
+
+      window.__timelines["02-email"] = tl;
+    })();
+  </script>
+</template>

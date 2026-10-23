@@ -36,9 +36,9 @@ const FEATURES = [
 ];
 
 const RESULTS = [
-  { value: "97%", label: "of 32 test emails pass every check" },
+  { value: "100%", label: "of 32 test emails pass every check" },
   { value: "100%", label: "privacy checks passed" },
-  { value: "~12s", label: "from email in to draft ready" },
+  { value: "~15s", label: "from email in to draft ready" },
   { value: "$0.002", label: "per email, Gemini paid-tier prices" },
 ];
 

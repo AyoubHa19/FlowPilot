@@ -1,0 +1,14 @@
+{
+  "bgm": null,
+  "voices": [],
+  "sfx": [
+    {
+      "frame": 1,
+      "file": "assets/sfx/track.wav",
+      "offset_s": 0,
+      "duration_s": 53,
+      "volume": 1.0,
+      "source": "host"
+    }
+  ]
+}

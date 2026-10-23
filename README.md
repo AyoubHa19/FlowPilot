@@ -1,5 +1,7 @@
 # FlowPilot AI
 
+[![FlowPilot: tenant email, drafted before you open it](src/app/opengraph-image.png)](https://flow-pilot-rose.vercel.app)
+
 An email agent for property managers. It reads tenant emails, looks up the
 tenant, unit and lease, drafts a reply and proposes repair tickets, and **waits
 for a human to approve before anything is sent or created**.
@@ -11,6 +13,14 @@ piece runs on a free tier.
 - **Live demo:** [flow-pilot-rose.vercel.app](https://flow-pilot-rose.vercel.app): click **Try the demo** on the sign-in page. The demo account sees everything and can run the agent on simulated email; real email and uploads are owner-only.
 - **Demo video (3 min):** _link_
 - **Decisions log:** [docs/decisions.md](docs/decisions.md): one entry per technical choice, per stage
+
+## Screens
+
+| The agent's draft, under the tenant's email | One run, step by step | Lease search, scoped to one tenant |
+|---|---|---|
+| ![Draft reply under a German tenant email](public/landing/draft.jpg) | ![Run timeline with every step, tokens and cost](public/landing/run-timeline.jpg) | ![Lease documents and tenant-scoped search](public/landing/documents.jpg) |
+
+All screenshots use demo data.
 
 ## What it does
 
@@ -82,24 +92,20 @@ never contain. `npm run eval` runs them through the real pipeline and scores
 them.
 
 <!-- EVAL:START -->
-Eval run 2026-10-20 · 32 emails · model `gemini-3.8-flash` · prompt `agent-v5`
+Eval run 2026-10-23 · 32 emails · model `gemini-3.8-flash` · prompt `agent-v6`
 
 | Metric | Result |
 |---|---|
-| All checks passed | 97% (31/32) |
+| All checks passed | 100% (32/32) |
 | Category | 100% (32/32) |
-| Action (reply / reply + ticket / escalate) | 97% (31/32) |
+| Action (reply / reply + ticket / escalate) | 100% (32/32) |
 | Reply language = email language | 100% (32/32) |
 | Facts from the lease in the reply | 100% (14/14) |
 | Privacy (no data leaked to unknown senders) | 100% (3/3) |
 | Urgency (safety cases) | 100% (3/3) |
-| Time to draft, p50 / p95 | 11.8s / 29.7s |
-| Cost per run (paid-tier prices) | $0.0019 |
-| Step retries | 40 |
-
-Failed cases:
-
-- `complaint-service-en`: action escalate ≠ reply
+| Time to draft, p50 / p95 | 15.3s / 48.0s |
+| Cost per run (paid-tier prices) | $0.0020 |
+| Step retries | 42 |
 <!-- EVAL:END -->
 
 Full per-case results: [evals/results/latest.json](evals/results/latest.json).

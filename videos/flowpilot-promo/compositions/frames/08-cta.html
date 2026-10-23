@@ -1,0 +1,81 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400.woff2") format("woff2"); font-weight: 400; font-style: normal; }
+@font-face { font-family: "Instrument Serif"; src: url("assets/fonts/InstrumentSerif-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; }
+@font-face { font-family: "Geist"; src: url("assets/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Geist Mono"; src: url("assets/fonts/GeistMono.woff2") format("woff2"); font-weight: 100 900; font-style: normal; }
+
+#root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #f4f5f8; font-family: "Geist", sans-serif; }
+.f08-cta-bg { position: absolute; inset: 0; background: #0b0b0f; }
+.f08-cta-kicker { font-family: "Geist Mono", monospace; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: #a1a4ae; }
+.f08-cta-display { font-family: "Instrument Serif", serif; font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; color: #f4f5f8; }
+.f08-cta-lime { color: #c8f135; }
+.f08-cta-italic { font-style: italic; }
+.f08-cta-card { background: #141419; border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 40px 80px -30px rgba(0,0,0,0.9); }
+.f08-cta-chip { display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 10px 20px; font-size: 24px; font-weight: 600; }
+.f08-cta-chip-lime { background: #c8f135; color: #15170b; }
+.f08-cta-tag { display: inline-block; border-radius: 8px; padding: 4px 10px; font-family: "Geist Mono", monospace; font-size: 16px; letter-spacing: 0.1em; font-weight: 500; }
+.f08-cta-caret { display: inline-block; width: 3px; height: 1em; margin-left: 3px; vertical-align: -0.12em; background: #c8f135; }
+
+
+.f08-cta-stack { position: absolute; left: 0; right: 0; top: 150px; display: flex; flex-direction: column; align-items: center; }
+.f08-cta-tile { width: 220px; height: 220px; border-radius: 52px; border: 1px solid rgba(255,255,255,0.14); background: linear-gradient(#1b1b21, #101014); display: flex; align-items: center; justify-content: center; }
+.f08-cta-tile svg { width: 150px; height: 150px; }
+.f08-cta-word { margin-top: 50px; font-size: 120px; font-weight: 600; letter-spacing: -0.03em; color: #f4f5f8; }
+.f08-cta-word em { font-family: "Instrument Serif", serif; font-weight: 400; font-style: italic; font-size: 1.14em; letter-spacing: 0; }
+.f08-cta-url { margin-top: 30px; font-family: "Geist Mono", monospace; font-size: 34px; color: #a1a4ae; }
+.f08-cta-chiprow { margin-top: 34px; }
+
+  </style>
+  <div id="root" data-composition-id="08-cta" data-width="1920" data-height="1080" data-duration="6">
+    <div id="f08-cta-clip1" class="clip f08-cta-bg" data-start="0" data-duration="6" data-track-index="0"></div>
+
+    <div class="clip f08-cta-stack" id="f08-cta-stack" data-start="0" data-duration="6" data-track-index="1">
+      <div class="f08-cta-tile" id="f08-cta-tile">
+        <svg viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect id="f08-cta-env" x="3" y="10" width="20" height="15" rx="3.2" stroke="#ffffff" stroke-width="1.6" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+          <path id="f08-cta-flap" d="M4.4 12.2 13 18.6l3.4-2.5" stroke="#ffffff" stroke-width="1.6" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+          <path id="f08-cta-arc" d="M16.4 16.1c3.6-2.7 6.5-6.2 10.6-10.3" stroke="#c8f135" stroke-width="2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+          <path id="f08-cta-head" d="M21.6 5.4h5.8v5.8" stroke="#c8f135" stroke-width="2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+        </svg>
+      </div>
+      <div class="f08-cta-word" id="f08-cta-word">Flow<em>Pilot</em></div>
+      <div class="f08-cta-url" id="f08-cta-url">flow-pilot-rose.vercel.app</div>
+      <div class="f08-cta-chiprow" id="f08-cta-chip"><span class="f08-cta-chip f08-cta-chip-lime">Try the demo →</span></div>
+    </div>
+  </div>
+  <script>
+    (() => {
+
+function typeOn(tl, el, text, at, dur, caret) {
+  const state = { n: 0 };
+  el.textContent = "";
+  tl.to(state, {
+    n: text.length, duration: dur, ease: "none",
+    onUpdate() { el.textContent = text.slice(0, Math.round(state.n)); },
+  }, at);
+  if (caret) {
+    tl.fromTo(caret, { opacity: 0 }, { opacity: 1, duration: 0.01 }, at);
+    tl.to(caret, { opacity: 0, duration: 0.2 }, at + dur + 0.3);
+  }
+}
+
+      const $ = (s) => document.querySelector('[data-composition-id="08-cta"] ' + s);
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo("#f08-cta-tile", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.8, ease: "power3.out" }, 0.1);
+      tl.to("#f08-cta-env", { attr: { "stroke-dashoffset": 0 }, duration: 0.7, ease: "power2.inOut" }, 0.3);
+      tl.to("#f08-cta-flap", { attr: { "stroke-dashoffset": 0 }, duration: 0.4, ease: "power2.inOut" }, 0.9);
+      tl.to("#f08-cta-arc", { attr: { "stroke-dashoffset": 0 }, duration: 0.45, ease: "power3.out" }, 1.25);
+      tl.to("#f08-cta-head", { attr: { "stroke-dashoffset": 0 }, duration: 0.3, ease: "power3.out" }, 1.6);
+      tl.fromTo("#f08-cta-word", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, 1.8);
+      tl.fromTo("#f08-cta-url", { opacity: 0 }, { opacity: 1, duration: 0.7 }, 3.0);
+      tl.fromTo("#f08-cta-chip", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2)" }, 3.4);
+      tl.to("#f08-cta-stack", { opacity: 0.85, duration: 0.6, ease: "power2.in" }, 5.4);
+
+      window.__timelines["08-cta"] = tl;
+    })();
+  </script>
+</template>
